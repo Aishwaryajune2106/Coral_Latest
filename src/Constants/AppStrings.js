@@ -1,0 +1,16 @@
+const AppStrings = {
+  IS_LOGIN: 'IS_LOGIN',
+  IS_MPIN:"IS_MPIN",
+  DEVICE_ID: 'DEVICE_ID',
+  DEVICE_TOKEN: 'DEVICE_TOKEN',
+  GOOGLE_API_KEY: 'AIzaSyA9AFpcw3xx97maaCNSEEoeCgVfStRnCm4', //new siraj patel
+  USER_API_KEY: 'USER_API_KEY',
+  USER_ROLE: 'USER_ROLE',
+  USER_MOBILE: 'USER_MOBILE',
+  USER_EMAIL: 'USER_EMAIL',
+  USER_ID: 'USER_ID',
+  USER_NAME: 'USER_NAME',
+  USER_STATUS: 'USER_STATUS',
+};
+
+export default AppStrings;

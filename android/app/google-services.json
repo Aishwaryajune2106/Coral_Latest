@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "344629519159",
+    "project_id": "cwi-nest",
+    "storage_bucket": "cwi-nest.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:344629519159:android:6407f5c282528750eaf0b2",
+        "android_client_info": {
+          "package_name": "com.corallatest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJXYmwomdvnqqN-tuDv5lUF1MfUPnftnE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
