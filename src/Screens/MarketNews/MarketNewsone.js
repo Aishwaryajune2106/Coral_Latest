@@ -108,7 +108,7 @@ const MarketNewsone = ({navigation}) => {
       <View style={styles.rightSection}>
         <Text style={styles.totalAmount}>{item.ri_amount_from}</Text>
         <Text style={styles.totalAmount}>{item.ri_amount_to}</Text>
-        <Text style={styles.investedAmount}>{item.ri_return_year} Yr</Text>
+        <Text style={styles.investedAmount}>{item.ri_return_year} %</Text>
         {/* <Text style={styles.withdrawnAmount}>{item.withdrawnAmount}</Text> */}
       </View>
     </TouchableOpacity>

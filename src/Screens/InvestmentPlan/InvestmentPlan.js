@@ -136,8 +136,8 @@ const InvestmentPlan = ({navigation}) => {
 
         // After the data is fetched and state is updated, navigate to the next screen
         setIsLoading(false);
-        console.log(chartData,"chartData12344444");
-        
+        console.log(chartData, 'chartData12344444');
+
         navigation.navigate('InvestReturnScreen', {
           chartData: chartData,
           returnAmount: returnAmount,
@@ -164,6 +164,7 @@ const InvestmentPlan = ({navigation}) => {
   useEffect(() => {
     fetchInvestmentData();
   }, [investmentAmount, formattedDuration, withdrawalFrequency]);
+
   useEffect(() => {
     handleReset();
   }, []);
@@ -179,7 +180,7 @@ const InvestmentPlan = ({navigation}) => {
       console.log('datagraphinside api', datagraph);
       const {result, return_amount, percentage} = response.data;
 
-      console.log('Response data:11111111222333', response.data);
+      console.log('Response', response.data);
 
       // Validate if the response is correct
       if (result && return_amount) {
@@ -309,8 +310,8 @@ const InvestmentPlan = ({navigation}) => {
           {showDuration && (
             <>
               <Text style={styles.label}>{t('Investment End Date')}</Text>
-              {console.log(datagraph,"datagraph1111111")}
-              
+              {console.log(datagraph, 'datagraph1111111')}
+
               <TouchableOpacity
                 style={styles.datePickerContainer}
                 onPress={() => setShowDatePicker(true)}>

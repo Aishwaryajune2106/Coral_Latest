@@ -134,7 +134,7 @@ const Contracts = ({navigation}) => {
           <TouchableOpacity
             style={styles.terminateButton}
             onPress={() => {
-              if (item.ui_nominee_id) {
+              if (item.n_id) {
                 setSelectedItem(item); // Set selectedItem before transfer
                 confirmTransfer();
               } else {
@@ -142,7 +142,7 @@ const Contracts = ({navigation}) => {
               }
             }}>
             <Text style={styles.terminateText}>
-              {item.ui_nominee_id ? t('Transfer') : t('Add Nominee')}
+              {item.n_id ? t('Transfer') : t('Add Nominee')}
             </Text>
           </TouchableOpacity>
 
@@ -230,7 +230,12 @@ const Contracts = ({navigation}) => {
       setCustomAlertVisible(true);
       return;
     }
+
     const userId = await AsyncStorage.getItem(AppStrings.USER_ID);
+
+    console.log('Selected Item:', ui_id, n_id); // Debugging log
+    console.log('userId :', userId); // Debugging log
+
     try {
       const response = await axios.post(
         'https://coral.lunarsenterprises.com/wealthinvestment/user/transfer/contract',
@@ -242,8 +247,6 @@ const Contracts = ({navigation}) => {
           },
         },
       );
-
-     
 
       if (response.data.result) {
         setSuccessModalVisible(true);
@@ -263,12 +266,12 @@ const Contracts = ({navigation}) => {
   // Call this function when the user confirms the transfer
 
   const confirmTransfer = () => {
-    if (!selectedItem || !selectedItem.ui_id || !selectedItem.ui_nominee_id) {
+    if (!selectedItem || !selectedItem.ui_id || !selectedItem.n_id) {
       setCustomAlertMessage('Invalid contract or nominee ID.');
       setCustomAlertVisible(true);
       return;
     }
-    transferContract(selectedItem.ui_id, selectedItem.ui_nominee_id);
+    transferContract(selectedItem.ui_id, selectedItem.n_id);
   };
 
   return (

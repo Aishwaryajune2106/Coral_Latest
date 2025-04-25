@@ -56,6 +56,7 @@ const Investmentstep4 = ({navigation}) => {
   const [uploadedFileName, setUploadedFileName] = useState(null);
   const [loadingDownload, setLoadingDownload] = useState(false);
   const [loadingUpload, setLoadingUpload] = useState(false);
+  console.log(formattedDuration, 'hello this is time');
 
   const nomineeoptions = [
     {label: 'Lunar', value: 'Lunar'},

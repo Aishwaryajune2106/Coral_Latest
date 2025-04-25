@@ -57,7 +57,7 @@ const Yourphoto = ({navigation}) => {
 
   const handleUpload = () => {
     Alert.alert(
-      'Upload National Identity Card Front Photo',
+      'Upload Your Photo',
       'Choose an option',
       [
         {text: 'Take Photo', onPress: () => pickImage('camera')},
