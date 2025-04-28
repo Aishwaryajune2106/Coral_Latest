@@ -48,6 +48,7 @@ const Cwi_Bank = ({navigation}) => {
     selectedInvestment,
     setSelectedInvestment,
   } = useContext(CountryContext);
+  
 
   const [selectedOptions, setSelectedOptions] = useState(null);
   const [selectedNomineeOption, setSelectedNomineeOption] = useState(null);
@@ -69,7 +70,7 @@ const Cwi_Bank = ({navigation}) => {
     {label: 'Union Bank', value: 'Union Bank'},
     {label: 'Fedral Bank', value: 'Fedral Bank'},
   ];
-  console.log(contract_id, 'heelooooodearr');
+  console.log(selectedInvestment, 'heelooooodearr');
 
   // Function to handle file upload
   const handleUpload = async () => {
@@ -152,7 +153,7 @@ const Cwi_Bank = ({navigation}) => {
     setLoadingDownload(true);
 
     const requestBody = {
-      id: selectedInvestment.id,
+      id: selectedInvestment.fi_id,
       amount: investmentAmount,
       bankAccount: selectedOptions.b_id,
       clientInfo: {

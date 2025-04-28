@@ -200,7 +200,11 @@ export default function Profile({navigation}) {
           <Image source={AppImages.Kycverify} style={styles.rightIcon} />
           <Text style={styles.rowText}>
             {' '}
-            {user?.u_kyc === 'pending' ? 'In Review' : 'Verified'}
+            {user?.u_kyc === 'pending'
+              ? 'In Review'
+              : user?.u_kyc === 'rejected'
+              ? 'Rejected'
+              : 'Verified'}
           </Text>
         </TouchableOpacity>
 
