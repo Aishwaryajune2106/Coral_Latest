@@ -56,6 +56,7 @@ const NestEgg = ({navigation}) => {
   const closeModalNo2open = () => {
     setModalNo2Visible(true);
   };
+console.log(selectedOption, "selectedOption");
 
   const confirmPlan = () => {
     setModalNo2Visible(false);

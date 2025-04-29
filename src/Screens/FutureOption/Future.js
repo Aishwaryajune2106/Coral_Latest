@@ -50,6 +50,7 @@ const Future = ({navigation}) => {
       setLoading(false);
     }
   };
+  
   // const [convertedbalancePrice, setConvertedbalancePrice] = useState(0);
   // const [currency, setCurrency] = useState('');
   // useEffect(() => {

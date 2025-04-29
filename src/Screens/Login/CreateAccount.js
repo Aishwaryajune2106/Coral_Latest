@@ -266,11 +266,11 @@ const CreateAccount = ({navigation}) => {
             </TouchableOpacity>
 
             <Text style={styles.footerText}>
-              {t('Already have an account')}?
+              {t('Already have an account')}?{" "}
               <Text
                 style={styles.link}
                 onPress={() => navigation.navigate('Login')}>
-                {t('Create PIN')}
+                {t('Login')}
               </Text>
             </Text>
           </View>

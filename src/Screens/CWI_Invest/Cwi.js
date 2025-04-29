@@ -250,7 +250,7 @@ const Cwi = ({navigation}) => {
 
       <View style={{marginHorizontal: 20, marginBottom: 40}}>
         <Text style={[styles.projectName, {marginTop: 20}]}>
-          {t('Top Companies')}
+          {/* {t('Top Companies')} */}
         </Text>
         <View style={{marginTop: 15}}>
           {selectedTab === 'future' ? (

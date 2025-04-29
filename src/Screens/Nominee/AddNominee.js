@@ -292,9 +292,64 @@ const AddNominee = ({navigation}) => {
     setAlertVisible(true);
   };
 
+  const validateForm = () => {
+    if (!name.trim()) {
+      showAlert('Validation Error', 'Please enter the name');
+      return false;
+    }
+    if (!relationship.trim()) {
+      showAlert('Validation Error', 'Please enter the relationship');
+      return false;
+    }
+    if (!email.trim()) {
+      showAlert('Validation Error', 'Please enter the email');
+      return false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      showAlert('Validation Error', 'Please enter a valid email');
+      return false;
+    }
+    if (!phone.trim()) {
+      showAlert('Validation Error', 'Please enter the phone number');
+      return false;
+    } else if (phone.length < 7) {
+      showAlert('Validation Error', 'Phone number is too short');
+      return false;
+    }
+    if (!country.trim()) {
+      showAlert('Validation Error', 'Please select a country');
+      return false;
+    }
+    if (!gender.trim()) {
+      showAlert('Validation Error', 'Please enter gender');
+      return false;
+    }
+    if (!address.trim()) {
+      showAlert('Validation Error', 'Please enter address');
+      return false;
+    }
+    if (!idProof) {
+      showAlert('Validation Error', 'Please select ID proof');
+      return false;
+    }
+    if (!pdfFile) {
+      showAlert('Validation Error', 'Please upload a PDF file');
+      return false;
+    }
+
+    return true;
+  };
+
+  const showAlert = (title, message) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertVisible(true);
+  };
+
   //..................Add Nominee Api..................//
 
   const handleAddNominee = async () => {
+    if (!validateForm()) return; // Ensure form validation happens first
+
     const formData = new FormData();
     formData.append('name', name);
     formData.append('email', email);
@@ -329,12 +384,12 @@ const AddNominee = ({navigation}) => {
       );
 
       const result = await response.json();
-      showCustomAlert(result.message, 'success'); // Call your custom alert
+      showCustomAlert(result.message, 'success');
       setTimeout(() => {
         navigation.goBack();
-      }, 2000); // Adjust the delay if needed
+      }, 2000);
     } catch (error) {
-      showCustomAlert('Failed to add nominee', 'error'); // Call custom alert for errors
+      showCustomAlert('Failed to add nominee', 'error');
       console.error(error);
     }
   };

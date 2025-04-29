@@ -50,7 +50,16 @@ const Nest_EggWFA = ({navigation, route}) => {
       const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
       try {
         setLoading(true);
-
+  
+        const bodyData = {
+          w_id: w_id, // Use passed `w_id`
+          amount: enteredAmount, // Use passed `enteredAmount`
+          duration: selectedPlan, // Use plan's duration
+          wfa_password: pin, // PIN entered by the user
+        };
+  
+        console.log('Request Body:', bodyData);
+  
         // Make the API request
         const response = await fetch(
           'https://coral.lunarsenterprises.com/wealthinvestment/user/nestegg/addamount',
@@ -58,21 +67,16 @@ const Nest_EggWFA = ({navigation, route}) => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              user_id: user_id, // Replace with actual user_id
+              user_id: user_id,
             },
-            body: JSON.stringify({
-              w_id: w_id, // Use passed `w_id`
-              amount: enteredAmount, // Use passed `enteredAmount`
-              duration: selectedPlan, // Use plan's duration
-              wfa_password: pin, // PIN entered by the user
-            }),
+            body: JSON.stringify(bodyData),
           },
         );
-
+  
         const result = await response.json();
-
+  
         setLoading(false);
-
+  
         if (response.ok && result.result) {
           setAlertData({
             title: 'Success',
@@ -103,6 +107,7 @@ const Nest_EggWFA = ({navigation, route}) => {
       setAlertVisible(true);
     }
   };
+  
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>

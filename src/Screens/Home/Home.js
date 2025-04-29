@@ -98,7 +98,7 @@ export default function Dashboard({navigation}) {
     const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
     try {
       const response = await axios.get(
-        'https://coral.lunarsenterprises.com/wealthinvestment/user/hfs/list',
+        'https://coral.lunarsenterprises.com/wealthinvestment/user/hgfs/list',
         {headers: {user_id}},
       );
 
@@ -361,10 +361,10 @@ export default function Dashboard({navigation}) {
                 source={AppImages.Correctlogo}
                 style={{width: 20, height: 20}}
               />
-              <Text style={styles.hgfText}>{item.tc_name}</Text>
+              <Text style={styles.hgfText}>{item.h_industry}</Text>
               <Text style={styles.hgfValue}>
-                {item.tc_growth_percentage}% | {t('Growth')}:{' '}
-                {item.tc_previous_year}
+                {item.h_growth}% | {t('Growth')}:{' '}
+                {item.h_last_year}
               </Text>
             </View>
           )}
