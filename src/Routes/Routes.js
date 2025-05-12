@@ -106,6 +106,9 @@ import Profileinfo from '../Screens/Profile/Profileinfo';
 import Faq from '../Screens/Faq/Faq';
 import Cwi_Amount from '../Screens/CWI_Invest/Cwi_Amount';
 import {useTranslation} from 'react-i18next';
+import Futureoption3 from '../Screens/FutureOption/Futureoption3';
+import Futureoption4 from '../Screens/FutureOption/Futureoption4';
+import NomineeList from '../Screens/Contracts/NomineeList';
 
 const Stack = createNativeStackNavigator();
 
@@ -472,6 +475,18 @@ function AuthStack() {
         })}
       />
       <Stack.Screen
+        name="FutureOption3"
+        component={Futureoption3}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
+        name="FutureOption4"
+        component={Futureoption4}
+        options={{headerShown: false}}
+      />
+
+      <Stack.Screen
         name="ProfitScreen"
         component={Profit}
         options={({navigation}) => ({
@@ -648,6 +663,15 @@ function AuthStack() {
         options={({navigation}) => ({
           header: () => (
             <HeaderCenter pageName={t('Contracts')} navigation={navigation} />
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="NomineeListScreen"
+        component={NomineeList}
+        options={({navigation}) => ({
+          header: () => (
+            <HeaderCenter pageName="Nominee" navigation={navigation} />
           ),
         })}
       />

@@ -64,24 +64,44 @@ const FutureStep2 = ({route, navigation}) => {
     ],
   };
 
+  console.log('datazzss');
+
   const handleBackToLogin = () => {
     setModalVisible(false);
     navigation.navigate('FutureOptionLastScreen');
   };
+
   const handleLockPress = async () => {
     setLoading(true);
-    const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
-    const requestBody = {
-      amount: investmentAmount,
-      year: formattedDuration,
-      wf: withdrawalFrequency,
-      project: 'Any',
-    };
     try {
+      const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
+      const sourceCurrency = await AsyncStorage.getItem('userCurrency');
+
+      // Fetch exchange rates with base AED
+      const exchangeResponse = await axios.get(
+        'https://api.exchangerate-api.com/v4/latest/AED',
+      );
+      const rates = exchangeResponse.data?.rates;
+
+      if (!rates || !sourceCurrency || !rates[sourceCurrency]) {
+        throw new Error('Unable to fetch currency conversion rate.');
+      }
+
+      const conversionRate = rates[sourceCurrency]; // how much 1 AED = in sourceCurrency
+      const convertedAmount = investmentAmount / conversionRate; // convert to AED
+      console.log(convertedAmount, 'convertedAmount');
+
+      const requestBody = {
+        amount: convertedAmount,
+        duration: duration,
+        wf: withdrawalFrequency,
+        project: 'Any',
+        profit_model: profitModal,
+      };
+
       const response = await axios.post(
         'https://coral.lunarsenterprises.com/wealthinvestment/user/lock/period',
         requestBody,
-
         {
           headers: {
             user_id: user_id,
@@ -89,10 +109,10 @@ const FutureStep2 = ({route, navigation}) => {
           },
         },
       );
-      console.log(requestBody, 'requestBody');
 
+      console.log(requestBody, 'requestBodysss');
+      console.log('API Response:', response?.data);
       if (response.data.result) {
-        console.log('API Response:', response.data);
         setModalVisible(true);
       } else {
         alert(response.data.message || 'Something went wrong');
@@ -129,7 +149,7 @@ const FutureStep2 = ({route, navigation}) => {
             {t('Investment End by')} {formattedDuration}
           </Text>
           <Text style={styles.chartPercentage}>{percentageReturn}</Text>
-          
+
           <LineChart
             data={{
               labels: chartData?.labels,

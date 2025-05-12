@@ -154,6 +154,7 @@ const Profit = () => {
   //...............wallet api.................//
 
   const [transactions, setTransactions] = useState([]);
+  const [walletAmount, setWalletAmount] = useState(0);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -168,9 +169,12 @@ const Profit = () => {
         );
 
         console.log('API Response:', response.data); // Debugging: Check API response
-
+        console.log('Wallet Amount:', response.data.wallet);
         if (response.data.result) {
           setTransactions(response.data.data);
+          setWalletAmount(response.data.wallet);
+          
+
           console.log('Updated Transactions State:', response.data.data); // Debugging: Check state update
         } else {
           setError('Failed to fetch transactions');
@@ -259,16 +263,7 @@ const Profit = () => {
             style={styles.headerBackground}>
             <View style={styles.headerContent}>
               <Text style={styles.balanceText}>{t('Profit')}</Text>
-              <Text style={styles.amountText}>
-                {transactions > 0
-                  ? `${transactions
-                      .reduce(
-                        (sum, txn) => sum + parseFloat(txn.w_amount || 0),
-                        0,
-                      )
-                      .toFixed(2)} `
-                  : '0'}
-              </Text>
+              <Text style={styles.amountText}>{walletAmount}</Text>
               <Text style={styles.balanceText1}>
                 {t('Today')}, {moment().format('DD MMM YYYY')}
               </Text>

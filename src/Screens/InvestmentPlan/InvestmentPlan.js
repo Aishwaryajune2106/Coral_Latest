@@ -22,6 +22,8 @@ import axios from 'axios';
 import {useFocusEffect} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {useTranslation} from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AppStrings from '../../Constants/AppStrings';
 
 const InvestmentPlan = ({navigation}) => {
   const {t, i18n} = useTranslation();
@@ -42,7 +44,9 @@ const InvestmentPlan = ({navigation}) => {
     selectedOptiony,
     setSelectedOptiony,
   } = useContext(CountryContext);
-  console.log(selectedOptiony, 'selectedOptiony');
+  
+
+  const [userCurrency, setUserCurrency] = useState('AED'); // Default AED
 
   // const [investmentAmount, setInvestmentAmount] = useState('');
   const [showDuration, setShowDuration] = useState(false);
@@ -74,42 +78,126 @@ const InvestmentPlan = ({navigation}) => {
     {value: 'Half-Yearly', label: t('Half-Yearly')},
     {value: 'Yearly', label: t('Yearly')},
   ];
+  const [exchangeRate, setExchangeRate] = useState(null);
 
-  const validateFields = () => {
-    if (!investmentAmount || parseFloat(investmentAmount) < 52000) {
+  useEffect(() => {
+    const fetchExchangeRate = async () => {
+      try {
+        const res = await fetch(
+          'https://api.exchangerate-api.com/v4/latest/AED',
+        );
+        const data = await res.json();
+        const rate = data.rates[userCurrency];
+        if (rate) {
+          setExchangeRate(rate);
+        }
+      } catch (err) {
+        console.error('Error fetching exchange rate:', err);
+      }
+    };
+
+    fetchExchangeRate();
+  }, [userCurrency]);
+
+  useEffect(() => {
+    const fetchUserCurrency = async () => {
+      try {
+        const response = await fetch(
+          'https://coral.lunarsenterprises.com/wealthinvestment/user',
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              user_id: await AsyncStorage.getItem(AppStrings.USER_ID), // make sure userId is defined
+            },
+          },
+        );
+
+        const result = await response.json();
+        if (result?.result && result?.data?.length > 0) {
+          const currency = result.data[0].u_currency || 'AED';
+          setUserCurrency(currency);
+          console.log('Fetched user currency:', currency);
+        }
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+      }
+    };
+
+    fetchUserCurrency();
+  }, []);
+
+  const validateFields = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        'https://api.exchangerate-api.com/v4/latest/AED',
+      );
+      const data = await response.json();
+
+      const selectedCurrency = userCurrency; // Fallback to AED
+      const rate = data.rates[selectedCurrency];
+      console.log('Selected Currency:', userCurrency);
+
+      if (!rate) {
+        setCustomAlert({
+          visible: true,
+          title: 'Error',
+          message: `Currency ${selectedCurrency} not supported.`,
+        });
+
+        setIsLoading(false);
+        return false;
+      }
+
+      // Convert input amount to AED
+      const amountInAED = parseFloat(investmentAmount) / rate;
+      console.log('Amount in AED:', amountInAED);
+
+      if (isNaN(amountInAED) || amountInAED < 52000) {
+        setCustomAlert({
+          visible: true,
+          title: 'Error',
+          message: 'Investment Amount must be at least 52000 AED.',
+        });
+        setIsLoading(false);
+        return false;
+      }
+
+      if (!duration || isNaN(duration) || parseInt(duration) < 1) {
+        setCustomAlert({
+          visible: true,
+          title: 'Error',
+          message: 'Duration must be at least 1 year.',
+        });
+        setIsLoading(false);
+        return false;
+      }
+
+      if (!profitModal) {
+        setCustomAlert({
+          visible: true,
+          title: 'Error',
+          message: 'Please select a profit modal.',
+        });
+        setIsLoading(false);
+        return false;
+      }
+
+      setIsLoading(false);
+      return true;
+    } catch (error) {
       setCustomAlert({
         visible: true,
         title: 'Error',
-        message: 'Investment Amount must be at least 52000 AED.',
+        message: 'Failed to fetch exchange rate.',
       });
+      setIsLoading(false);
       return false;
     }
-    if (!duration) {
-      setCustomAlert({
-        visible: true,
-        title: 'Error',
-        message: 'Please select a duration.',
-      });
-      return false;
-    }
-    if (!profitModal) {
-      setCustomAlert({
-        visible: true,
-        title: 'Error',
-        message: 'Please select a profit modal.',
-      });
-      return false;
-    }
-    if (profitModal === 'Fixed' && !withdrawalFrequency) {
-      setCustomAlert({
-        visible: true,
-        title: 'Error',
-        message: 'Please select a withdrawal frequency.',
-      });
-      return false;
-    }
-    return true;
   };
+
   const validateEndDate = selectedDate => {
     const today = new Date();
     const oneYearFromNow = new Date(today.setFullYear(today.getFullYear() + 1));
@@ -155,7 +243,7 @@ const InvestmentPlan = ({navigation}) => {
 
   const datagraph = {
     amount: investmentAmount,
-    year: formattedDuration,
+    duration: duration,
     wf: withdrawalFrequency,
     project: 'any',
     platform: 'mobile',
@@ -163,7 +251,7 @@ const InvestmentPlan = ({navigation}) => {
 
   useEffect(() => {
     fetchInvestmentData();
-  }, [investmentAmount, formattedDuration, withdrawalFrequency]);
+  }, [investmentAmount, duration, withdrawalFrequency]);
 
   useEffect(() => {
     handleReset();
@@ -282,68 +370,51 @@ const InvestmentPlan = ({navigation}) => {
           <TextInput
             style={styles.input}
             placeholder={t('Enter amount')}
-            placeholderTextColor={'#888'}
             keyboardType="numeric"
             value={investmentAmount}
             onChangeText={text => {
               setInvestmentAmount(text);
-              if (parseFloat(text) >= 52000) {
+              if (text && parseFloat(text) > 0) {
                 setShowDuration(true);
               } else {
                 setShowDuration(false);
-                setDuration(null);
-                setShowProfitModal(false);
-                setProfitModal('');
-                setShowFrequencyDropdown(false);
-                setWithdrawalFrequency('');
+                setDuration(null); // clear duration if amount is removed
               }
             }}
           />
+
           {parseFloat(investmentAmount) > 0 &&
-            parseFloat(investmentAmount) < 52000 && (
+            exchangeRate &&
+            parseFloat(investmentAmount) / exchangeRate < 52000 && (
               <Text style={styles.validationText}>
-                {t('Amount should not be less than 52,000 AED')}
+                {t(
+                  'Amount should be at least 52,000 AED in your selected currency',
+                )}
               </Text>
             )}
 
           {/* Duration Field */}
           {showDuration && (
-            <>
-              <Text style={styles.label}>{t('Investment End Date')}</Text>
-              {console.log(datagraph, 'datagraph1111111')}
+            <View style={{}}>
+              <Text style={styles.label1}>{t('Duration')} (Years)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder={t('Enter duration')}
+                keyboardType="numeric"
+                value={duration ? String(duration) : ''}
+                onChangeText={text => {
+                  setDuration(text);
 
-              <TouchableOpacity
-                style={styles.datePickerContainer}
-                onPress={() => setShowDatePicker(true)}>
-                <Text style={styles.dateText}>
-                  {duration
-                    ? moment(duration).format('DD-MM-YYYY')
-                    : t('Select Date')}
-                </Text>
-
-                <Image source={AppImages.Calender} style={styles.icon} />
-              </TouchableOpacity>
-
-              {showDatePicker && (
-                <DateTimePicker
-                  value={duration || new Date()}
-                  mode="date"
-                  display="default"
-                  onChange={(event, selectedDate) => {
-                    setShowDatePicker(false);
-                    if (selectedDate) {
-                      if (validateEndDate(selectedDate)) {
-                        setDuration(selectedDate);
-                        setShowProfitModal(true);
-                      }
-                    }
-                  }}
-                />
-              )}
-              {dateError ? (
-                <Text style={styles.validationText}>{dateError}</Text>
-              ) : null}
-            </>
+                  if (text && parseFloat(text) > 0) {
+                    setShowProfitModal(true);
+                  } else {
+                    setShowProfitModal(false);
+                    setProfitModal(null);
+                    setShowFrequencyDropdown(false);
+                  }
+                }}
+              />
+            </View>
           )}
 
           {/* Profit Modal Field */}

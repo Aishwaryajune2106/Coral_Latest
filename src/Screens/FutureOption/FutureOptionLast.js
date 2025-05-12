@@ -48,8 +48,10 @@ const FutureOptionLast = ({navigation}) => {
       const data = await response.json();
 
       if (data.result) {
-        const activePlans = data.list.filter(item => item.status === 'active');
-        const expiredPlans = data.list.filter(
+        const activePlans = data?.list?.filter(
+          item => item.status === 'active',
+        );
+        const expiredPlans = data?.list?.filter(
           item => item.status === 'expired',
         );
 
@@ -65,68 +67,43 @@ const FutureOptionLast = ({navigation}) => {
   };
   const [convertedbalancePrice, setConvertedbalancePrice] = useState(0);
   const [currency, setCurrency] = useState('');
-  // useEffect(() => {
-  //   const fetchAndCalculatePrices = async () => {
-  //     const {convertedbalancePrice} = await calculateConvertedPrices();
-
-  //     setConvertedbalancePrice(convertedbalancePrice);
-  //   };
-
-  //   fetchAndCalculatePrices();
-  // }, [totalInvestment]);
-  // // Function to calculate the wallet balance based on the stored rate
-  // const calculateConvertedPrices = async () => {
-  //   try {
-  //     const currencyRate = await AsyncStorage.getItem('userCurrencyRate');
-  //     const currency = await AsyncStorage.getItem('userCurrency');
-  //     setCurrency(currency);
-  //     const rate = JSON.parse(currencyRate);
-  //     console.log(rate, 'rate');
-  //     console.log(currency, 'currency');
-
-  //     if (rate) {
-  //       // Multiply share price and own price by the currency rate
-
-  //       const convertedbalancePrice = rate * (totalInvestment || 0);
-
-  //       console.log(`Converted balance Price: ${convertedbalancePrice}`);
-
-  //       return {convertedbalancePrice};
-  //     } else {
-  //       console.log('Rate not found in AsyncStorage');
-  //       return {
-  //         convertedbalancePrice: 0,
-  //       };
-  //     }
-  //   } catch (error) {
-  //     console.error('Error retrieving rate from AsyncStorage:', error);
-  //     return {
-  //       convertedbalancePrice: 0,
-  //     };
-  //   }
-  // };
-  // console.log(convertedbalancePrice, 'convertedbalancePrice');
 
   const renderItem = ({item}) => (
-    <View style={styles.transactionItem}>
-      <Image source={AppImages.Polygon} style={styles.icon} />
-      <View style={styles.transactionDetails}>
-        <Text style={styles.transactionName}>{item.lp_project}</Text>
-        <Text
-          style={[
-            styles.transactionType,
-            item.status === 'expired' && {color: 'red'},
-          ]}>
-          {item.status}
-        </Text>
+    <TouchableOpacity
+      onPress={() =>
+        navigation.navigate('FutureOption3', {
+          lp_id: item.lp_id,
+          lp_u_id: item.lp_u_id,
+          lp_percent: item.lp_percent,
+          lp_amount: item.lp_amount,
+          lp_duration: item.lp_duration,
+          lp_project: item.lp_project,
+          lp_wf: item.lp_wf,
+          lp_return: item.lp_return,
+          lp_profit_model: item.lp_profit_model,
+          status: item.status,
+        })
+      }>
+      <View style={styles.transactionItem}>
+        <Image source={AppImages.Polygon} style={styles.icon} />
+        <View style={styles.transactionDetails}>
+          <Text style={styles.transactionName}>{item.lp_project}</Text>
+          <Text
+            style={[
+              styles.transactionType,
+              item.status === 'expired' && {color: 'red'},
+            ]}>
+            {item.status}
+          </Text>
+        </View>
+        <View style={styles.transactionInfo}>
+          <Text style={styles.amountPositive}>{item.lp_amount}</Text>
+          <Text style={styles.transactionDate}>
+            {new Date(item.lp_date).toDateString()}
+          </Text>
+        </View>
       </View>
-      <View style={styles.transactionInfo}>
-        <Text style={styles.amountPositive}>{item.lp_amount}</Text>
-        <Text style={styles.transactionDate}>
-          {new Date(item.lp_date).toDateString()}
-        </Text>
-      </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -164,7 +141,8 @@ const FutureOptionLast = ({navigation}) => {
                   <Text style={styles.amountText}>
                     {totalInvestment
                       ? `${totalInvestment.toFixed(2)}`
-                      : `${totalInvestment}`} AED
+                      : `${totalInvestment}`}{' '}
+                    AED
                   </Text>
                   {/* <Text style={styles.changeText}>
                     up by 2% from last month
@@ -175,16 +153,23 @@ const FutureOptionLast = ({navigation}) => {
                 </View>
               </View>
               <View>
-                <TouchableOpacity
-                  style={styles.withdrawButtons}
-                  onPress={() => navigation.navigate('FutureStep1Screen')}>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Text style={styles.plusIcon}>+</Text>
-                    <Text style={styles.withdrawButtonTexts}>
-                      {t('Start to New Invest')}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
+                <View>
+                  {/* Text above the button */}
+                  <Text style={styles.investLabel}>
+                    Lock Current ROI upto 3 Months and then enjoy invest
+                  </Text>
+
+                  <TouchableOpacity
+                    style={styles.withdrawButtons}
+                    onPress={() => navigation.navigate('FutureStep1Screen')}>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      <Text style={styles.plusIcon}>+</Text>
+                      <Text style={styles.withdrawButtonTexts}>
+                        {t('Start to New Invest')}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
               </View>
             </ImageBackground>
           </View>
@@ -196,22 +181,18 @@ const FutureOptionLast = ({navigation}) => {
                   {t('Future Plan In')}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setIsFlexibleMode(false)}>
+              {/* <TouchableOpacity onPress={() => setIsFlexibleMode(false)}>
                 <Text style={[styles.tab, !isFlexibleMode && styles.activeTab]}>
                   {t('Future Plan Out')}
                 </Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
 
-            {isFlexibleMode ? (
-              <FlatList
-                data={futurePlanIn}
-                keyExtractor={item => item.lp_id.toString()}
-                renderItem={renderItem}
-              />
+            {futurePlanIn?.length === 0 ? (
+              <Text style={styles.noPlanText}>No current plans</Text>
             ) : (
               <FlatList
-                data={futurePlanOut}
+                data={futurePlanIn}
                 keyExtractor={item => item.lp_id.toString()}
                 renderItem={renderItem}
               />
@@ -219,6 +200,11 @@ const FutureOptionLast = ({navigation}) => {
           </View>
         </ScrollView>
       )}
+      <TouchableOpacity
+        style={styles.backToHomeButton}
+        onPress={() => navigation.navigate('DashBoardStack')}>
+        <Text style={styles.backToHomeText}>Back to Home</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -413,6 +399,35 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     resizeMode: 'contain',
+  },
+  investLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: AppColors.white,
+    // marginTop: 50,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  noPlanText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+    color: '#888',
+  },
+  backToHomeButton: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    backgroundColor: AppColors.Yellow, // Yellow
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+  },
+
+  backToHomeText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

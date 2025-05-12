@@ -182,10 +182,16 @@ const VerifyEmail = ({navigation, route}) => {
         message={modalMessage}
         onConfirm={() => {
           setModalVisible(false);
-          if (modalTitle === 'Success') {
+        
+          // Only navigate to ChangePassword when OTP is verified
+          if (
+            modalTitle === 'Success' &&
+            modalMessage !== 'A new OTP has been sent to your email.'
+          ) {
             navigation.navigate('ChangePassword', {email: email?.trim()});
           }
         }}
+        
       />
     </ScrollView>
   );

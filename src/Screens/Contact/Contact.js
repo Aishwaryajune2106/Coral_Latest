@@ -163,11 +163,10 @@ const Contactus = ({navigation}) => {
         const formattedMessages = data.data.map(msg => ({
           id: msg.id.toString(),
           text: msg.message,
-          sender: msg.sendBy === parseInt(userId) ? 'user' : 'admin',
+          sender: msg.sendBy,
+          name: msg.sendBy === 'admin' ? msg.ad_name : msg.u_name,
         }));
         setCounter(counter + 1);
-        console.log(data, 'formattedMessages');
-
         setMessages(formattedMessages);
       } else {
         console.log(
@@ -213,13 +212,26 @@ const Contactus = ({navigation}) => {
             renderItem={({item, index}) => (
               <View
                 style={[
-                  styles.messageContainer,
+                  styles.messageWrapper,
                   item.sender === 'user'
-                    ? styles.userMessage
-                    : styles.botMessage,
-                  index === messages?.length - 1 ? {marginBottom: 100} : null, // Add marginBottom to last item
+                    ? styles.userWrapper
+                    : styles.botWrapper,
+                  index === messages?.length - 1 ? {marginBottom: 100} : null,
                 ]}>
-                <Text style={styles.messageText}>{item.text}</Text>
+                {/* Sender Name */}
+                {item.name && (
+                  <Text style={styles.senderName}>{item.name}</Text>
+                )}
+                {/* Message */}
+                <View
+                  style={[
+                    styles.messageContainer,
+                    item.sender === 'user'
+                      ? styles.userMessage
+                      : styles.botMessage,
+                  ]}>
+                  <Text style={styles.messageText}>{item.text}</Text>
+                </View>
               </View>
             )}
             contentContainerStyle={{flexGrow: 1}}
@@ -299,6 +311,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8d7da', // light red/pink
   },
   messageText: {fontSize: 16, color: 'black'},
+  senderName: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+    fontWeight: '600',
+  },
+  messageWrapper: {
+    marginBottom: 10,
+    maxWidth: '70%',
+  },
+  userWrapper: {
+    alignSelf: 'flex-start',
+  },
+  botWrapper: {
+    alignSelf: 'flex-end',
+  },
 });
 
 export default Contactus;

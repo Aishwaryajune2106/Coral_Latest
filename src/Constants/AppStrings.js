@@ -1,6 +1,6 @@
 const AppStrings = {
   IS_LOGIN: 'IS_LOGIN',
-  IS_MPIN:"IS_MPIN",
+  IS_MPIN: 'IS_MPIN',
   DEVICE_ID: 'DEVICE_ID',
   DEVICE_TOKEN: 'DEVICE_TOKEN',
   GOOGLE_API_KEY: 'AIzaSyA9AFpcw3xx97maaCNSEEoeCgVfStRnCm4', //new siraj patel
@@ -11,6 +11,8 @@ const AppStrings = {
   USER_ID: 'USER_ID',
   USER_NAME: 'USER_NAME',
   USER_STATUS: 'USER_STATUS',
+  USER_DATA: 'USER_DATA',
+  USER_CURRENCY: 'USER_CURRENCY',
 };
 
 export default AppStrings;

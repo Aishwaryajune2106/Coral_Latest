@@ -43,24 +43,26 @@ const Cwi = ({navigation}) => {
 
   const fetchInvestments = async () => {
     setLoading(true);
-    const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
     try {
       const response = await fetch(
-        'https://coral.lunarsenterprises.com/wealthinvestment/user/cwiInvestments',
+        'https://coral.lunarsenterprises.com/wealthinvestment/user/top_company',
+
         {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            user_id,
+            user_id: await AsyncStorage.getItem(AppStrings.USER_ID),
           },
         },
       );
+
       const data = await response.json();
+      console.log('API Data:', data.result);
       if (data.result) {
         setCurrentInvestments(data.data);
       }
     } catch (error) {
-      console.error('Error fetching current investments:', error);
+      console.error('Error fetching top companies:', error);
     }
     setLoading(false);
   };
@@ -140,27 +142,21 @@ const Cwi = ({navigation}) => {
       <View style={styles.leftSection}>
         <Image source={AppImages.Future} style={styles.roundImage} />
         <View style={styles.textContainer}>
-          <Text style={styles.projectName}>{item.ui_project_name}</Text>
-          {/* <Text style={styles.subCompany}>{item.projectplace}</Text> */}
-          {/* <Text style={styles.subCompany}>{item.subCompany}</Text> */}
+          <Text style={styles.projectName}>{item.tc_name}</Text>
+          <Text style={styles.subCompany}>
+            {/* ₹ {item.tc_current_year?.toLocaleString()} -{' '}
+            {item.tc_growth_percentage}% growth */}
+          </Text>
         </View>
       </View>
       <View style={styles.rightSection}>
-        <Text style={styles.totalAmount}>Amnt: {item.ui_amount}</Text>
-        <Text style={styles.investedAmount}>return: {item.ui_return}</Text>
-        <Text style={styles.investedAmount}>
-          percentage: {item.ui_percentage}%
+        <Text style={styles.totalAmount}>
+          {item.tc_minimum_investment?.toLocaleString()}
         </Text>
-        {/* <Text
-          style={[
-            styles.withdrawnAmount,
-            {color: item.return_type === 'profit' ? 'green' : 'red'},
-          ]}>
-          {item.return_type}
-        </Text> */}
       </View>
     </TouchableOpacity>
   );
+
   const renderItemfuture = ({item}) => (
     <View>
       <TouchableOpacity
@@ -256,13 +252,14 @@ const Cwi = ({navigation}) => {
           {selectedTab === 'future' ? (
             <FlatList
               data={futureInvestments}
+              showsVerticalScrollIndicator={false}
               keyExtractor={item => item?.id?.toString()}
               renderItem={renderItemfuture}
               contentContainerStyle={{
                 paddingBottom: 0,
                 flexGrow: 1,
                 justifyContent:
-                  futureInvestments.length === 0 ? 'center' : 'flex-start',
+                  futureInvestments?.length === 0 ? 'center' : 'flex-start',
               }}
               ListEmptyComponent={
                 <Text
@@ -275,8 +272,8 @@ const Cwi = ({navigation}) => {
           ) : (
             <FlatList
               data={currentInvestments}
-              keyExtractor={item => item?.id?.toString()}
               showsVerticalScrollIndicator={false}
+              keyExtractor={item => item?.tc_id?.toString()}
               renderItem={renderItem}
               contentContainerStyle={{
                 paddingBottom: 0,
@@ -430,6 +427,7 @@ const styles = StyleSheet.create({
   },
   totalAmount: {
     fontSize: 15,
+
     // fontWeight: 'bold',
     color: '#000',
     // fontFamily: 'serif',

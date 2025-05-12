@@ -36,6 +36,9 @@ const Cwi_Bank = ({navigation}) => {
     returnAmount,
     percentageReturn,
   } = useContext(CountryContext);
+  console.log(duration, 'duration is thereyy');
+  console.log(investmentAmount, 'investmentAmount is thereyy');
+
   const {
     setSelectedOption,
     setPersonalDetails,
@@ -48,7 +51,6 @@ const Cwi_Bank = ({navigation}) => {
     selectedInvestment,
     setSelectedInvestment,
   } = useContext(CountryContext);
-  
 
   const [selectedOptions, setSelectedOptions] = useState(null);
   const [selectedNomineeOption, setSelectedNomineeOption] = useState(null);
@@ -149,39 +151,71 @@ const Cwi_Bank = ({navigation}) => {
 
   //..............INVEST API.....................//
   const [contract_id, setContract_id] = useState('');
+
   const handleDownload = async () => {
     setLoadingDownload(true);
 
-    const requestBody = {
-      id: selectedInvestment.fi_id,
-      amount: investmentAmount,
-      bankAccount: selectedOptions.b_id,
-      clientInfo: {
-        clientName: personalDetails.fullName,
-        email: personalDetails.email,
-        nationalId: personalDetails.idproof,
-        passportId: personalDetails.idproof,
-        phone: personalDetails.phoneNumber,
-        residentialAddress: personalDetails.address,
-      },
-      nomineeDetails: {
-        contactNumber: selectedNomineeOption.mobile,
-        emiratesOrPassportId: selectedNomineeOption.emiatesId,
-        nomineeFullName: selectedNomineeOption.name,
-        relationship: selectedNomineeOption.relation,
-        residentialAddress: selectedNomineeOption.address,
-      },
-      securityOption: selectedOption,
-    };
-    console.log(requestBody, 'REQUESTTTT');
-
-    const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
-    const headers = {
-      'Content-Type': 'application/json',
-      user_id: user_id,
-    };
-
     try {
+      const sourceCurrency = await AsyncStorage.getItem('userCurrency');
+      const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
+
+      // Fetch exchange rates with AED as the base
+      const exchangeResponse = await axios.get(
+        'https://api.exchangerate-api.com/v4/latest/AED',
+      );
+
+      if (
+        !exchangeResponse.data.rates ||
+        !exchangeResponse.data.rates[sourceCurrency]
+      ) {
+        throw new Error(`Unable to find exchange rate for ${sourceCurrency}`);
+      }
+
+      const exchangeRates = exchangeResponse.data.rates;
+      const rate = exchangeRates[sourceCurrency];
+      const amountInAED = parseFloat(investmentAmount) / rate;
+      console.log(amountInAED, 'amountInAED');
+
+      const nomineeSelected = selectedNomineeOption !== null;
+
+      const requestBody = {
+        id: selectedInvestment.fi_id,
+        amount: amountInAED.toFixed(2), // amount in AED (converted)
+        duration: duration,
+        bankAccount: selectedOptions.b_id,
+        clientInfo: {
+          clientName: personalDetails.fullName,
+          email: personalDetails.email,
+          nationalId: personalDetails.idproof,
+          passportId: personalDetails.idproof,
+          phone: personalDetails.phoneNumber,
+          residentialAddress: personalDetails.address,
+        },
+        nomineeDetails: nomineeSelected
+          ? {
+              contactNumber: selectedNomineeOption.mobile || '',
+              emiratesOrPassportId: selectedNomineeOption.emiatesId || '',
+              nomineeFullName: selectedNomineeOption.name || '',
+              relationship: selectedNomineeOption.relation || '',
+              residentialAddress: selectedNomineeOption.address || '',
+            }
+          : {
+              contactNumber: '',
+              emiratesOrPassportId: '',
+              nomineeFullName: '',
+              relationship: '',
+              residentialAddress: '',
+            },
+        securityOption: selectedOption,
+      };
+
+      console.log(requestBody, 'REQUESTTTT');
+
+      const headers = {
+        'Content-Type': 'application/json',
+        user_id: user_id,
+      };
+
       const response = await axios.post(
         'https://coral.lunarsenterprises.com/wealthinvestment/user/cwiInvestment',
         requestBody,
@@ -195,7 +229,7 @@ const Cwi_Bank = ({navigation}) => {
 
         const filePath = response.data.path;
         console.log('Download URL: ', filePath);
-        console.log('contract_id ', contract_id);
+        console.log('contract_id ', contractid);
         Linking.openURL(filePath);
         setIsDownloaded(true);
       } else {
@@ -203,8 +237,11 @@ const Cwi_Bank = ({navigation}) => {
         Alert.alert('Error', response.data.message || 'Something went wrong');
       }
     } catch (err) {
-      console.error('Error during API call:', err);
-      Alert.alert('Error', 'An error occurred while processing your request.');
+      console.error('Error during currency conversion or API call:', err);
+      Alert.alert(
+        'Error',
+        err.message || 'An error occurred while processing your request.',
+      );
     } finally {
       setLoadingDownload(false);
     }
@@ -220,160 +257,169 @@ const Cwi_Bank = ({navigation}) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Image source={AppImages.Investimg} style={styles.headerImage} />
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.navigate('DashBoardStack')}>
-          <Image
-            source={AppImages.Leftarrow}
-            style={[
-              styles.backIcon,
-              i18n.language === 'ar' ? {transform: [{scaleX: -1}]} : {},
-            ]}
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>{t('CWI Investment')}</Text>
-      </View>
-
-      <View style={styles.whiteContainer}>
-        <View>
-          <View style={styles.securityContainer}>
-            <Image source={AppImages.Bank} style={styles.securityIcon} />
-            <Text style={styles.securityText}>{t('Bank Details')}</Text>
-          </View>
-
-          <View
-            style={{
-              backgroundColor: AppColors.Grey,
-              width: '100%',
-              borderWidth: 0.2,
-              marginVertical: 7,
-            }}></View>
-
-          <View style={{marginTop: 20}}>
-            {/* <Text style={styles.labelText}>Select Bank</Text> */}
-            <DropdownWithDeleteAndAdd
-              options={options}
-              selectedOption={selectedOptions}
-              onSelectOption={option => setSelectedOptions(option)}
+    <View style={{flex: 1}}>
+      <ScrollView contentContainerStyle={{paddingBottom: 100}}>
+        <View style={styles.header}>
+          <Image source={AppImages.Investimg} style={styles.headerImage} />
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.navigate('DashBoardStack')}>
+            <Image
+              source={AppImages.Leftarrow}
+              style={[
+                styles.backIcon,
+                i18n.language === 'ar' ? {transform: [{scaleX: -1}]} : {},
+              ]}
             />
-          </View>
-          <View style={{marginTop: 20}}>
-            {/* <Text style={styles.labelText}>Select Nominee</Text> */}
-            <Dropdownforbank
-              options={nomineeoptions}
-              selectedOption={selectedNomineeOption}
-              onSelectOption={option => setSelectedNomineeOption(option)}
-            />
-          </View>
+          </TouchableOpacity>
+          <Text style={styles.headerText}>{t('CWI Investment')}</Text>
         </View>
-        {!isDownloaded ? (
-          <>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.nextButton}
-                onPress={handleDownload}
-                disabled={loadingDownload}>
-                {loadingDownload ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={AppColors.bordergreen}
-                  />
-                ) : (
-                  <>
-                    <Text style={styles.buttonText}>
-                      {t('Click To Download')}
-                    </Text>
-                    <Image
-                      source={AppImages.Download}
-                      style={styles.downloadImage}
-                    />
-                  </>
-                )}
-              </TouchableOpacity>
+
+        <View style={styles.whiteContainer}>
+          <View>
+            <View style={styles.securityContainer}>
+              <Image source={AppImages.Bank} style={styles.securityIcon} />
+              <Text style={styles.securityText}>{t('Bank Details')}</Text>
             </View>
-            <Text style={styles.stepTextred}>
-              {t(
-                'DOWNLOAD THE FORM, SIGN IT, AND UPLOAD IT TO COMPLETE YOUR INVESTMENT',
-              )}
-            </Text>
-          </>
-        ) : (
-          <>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.nextButton}
-                onPress={handleUpload}
-                disabled={loadingUpload}>
-                {loadingUpload ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={AppColors.bordergreen}
-                  />
-                ) : (
-                  <>
-                    <Text style={styles.buttonText}>
-                      {t('Click To Upload')}
-                    </Text>
-                    <Image
-                      source={AppImages.Upload}
-                      style={styles.downloadImage}
-                    />
-                  </>
-                )}
-              </TouchableOpacity>
+
+            <View
+              style={{
+                backgroundColor: AppColors.Grey,
+                width: '100%',
+                borderWidth: 0.2,
+                marginVertical: 7,
+              }}></View>
+
+            <View style={{marginTop: 20}}>
+              {/* <Text style={styles.labelText}>Select Bank</Text> */}
+              <DropdownWithDeleteAndAdd
+                options={options}
+                selectedOption={selectedOptions}
+                onSelectOption={option => setSelectedOptions(option)}
+              />
             </View>
-            {uploadedFilePath && uploadedFileName && (
-              <View style={styles.filecontain}>
-                <Text style={styles.uploadedFileText}>
-                  {t('Uploaded File')}: {uploadedFileName}
-                </Text>
+            <View style={{marginTop: 20}}>
+              {/* <Text style={styles.labelText}>Select Nominee</Text> */}
+              <Dropdownforbank
+                options={nomineeoptions}
+                selectedOption={selectedNomineeOption}
+                onSelectOption={option => setSelectedNomineeOption(option)}
+              />
+            </View>
+          </View>
+          {!isDownloaded ? (
+            <>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.nextButton}
+                  onPress={handleDownload}
+                  disabled={loadingDownload}>
+                  {loadingDownload ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={AppColors.bordergreen}
+                    />
+                  ) : (
+                    <>
+                      <Text style={styles.buttonText}>
+                        {t('Click To Download')}
+                      </Text>
+                      <Image
+                        source={AppImages.Download}
+                        style={styles.downloadImage}
+                      />
+                    </>
+                  )}
+                </TouchableOpacity>
               </View>
-            )}
-            <View style={styles.buttonContainer}>
+              <Text style={styles.stepTextred}>
+                {t(
+                  'DOWNLOAD THE FORM, SIGN IT, AND UPLOAD IT TO COMPLETE YOUR INVESTMENT',
+                )}
+              </Text>
+            </>
+          ) : (
+            <>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.nextButton}
+                  onPress={handleUpload}
+                  disabled={loadingUpload}>
+                  {loadingUpload ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={AppColors.bordergreen}
+                    />
+                  ) : (
+                    <>
+                      <Text style={styles.buttonText}>
+                        {t('Click To Upload')}
+                      </Text>
+                      <Image
+                        source={AppImages.Upload}
+                        style={styles.downloadImage}
+                      />
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+              {uploadedFilePath && uploadedFileName && (
+                <View style={styles.filecontain}>
+                  <Text style={styles.uploadedFileText}>
+                    {t('Uploaded File')}: {uploadedFileName}
+                  </Text>
+                </View>
+              )}
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.nextButton}
+                  onPress={handleProceedToPayment}>
+                  <Text style={styles.buttonText}>
+                    {t('Proceed to Payment')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </View>
+        {/* Modal */}
+        <Modal
+          transparent={true}
+          visible={modalVisible}
+          animationType="fade"
+          onRequestClose={() => setModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
               <TouchableOpacity
-                style={styles.nextButton}
-                onPress={handleProceedToPayment}>
-                <Text style={styles.buttonText}>{t('Proceed to Payment')}</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-      </View>
-      {/* Modal */}
-      <Modal
-        transparent={true}
-        visible={modalVisible}
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeButtonText}>✕</Text>
-            </TouchableOpacity>
-            <Text style={styles.modalText}>
-              {t('Confirm to proceed with payment')}?
-            </Text>
-            <View style={styles.modalButtonsContainer}>
-              <TouchableOpacity
-                style={styles.cancelButton}
+                style={styles.closeButton}
                 onPress={() => setModalVisible(false)}>
-                <Text style={styles.cancelButtonText}>{t('Cancel')}</Text>
+                <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.proceedButton}
-                onPress={confirmPayment}>
-                <Text style={styles.proceedButtonText}>{t('Proceed')}</Text>
-              </TouchableOpacity>
+              <Text style={styles.modalText}>
+                {t('Confirm to proceed with payment')}?
+              </Text>
+              <View style={styles.modalButtonsContainer}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => setModalVisible(false)}>
+                  <Text style={styles.cancelButtonText}>{t('Cancel')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.proceedButton}
+                  onPress={confirmPayment}>
+                  <Text style={styles.proceedButtonText}>{t('Proceed')}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
-    </ScrollView>
+        </Modal>
+      </ScrollView>
+      <TouchableOpacity
+        style={styles.backToHomeButton}
+        onPress={() => navigation.navigate('Home')}>
+        <Text style={styles.backToHomeText}>Back to Home</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
@@ -599,5 +645,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: AppColors.white,
     fontWeight: '500',
+  },
+  backToHomeButton: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    backgroundColor: AppColors.Yellow, // Yellow
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+  },
+
+  backToHomeText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

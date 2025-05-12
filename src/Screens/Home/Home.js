@@ -259,9 +259,43 @@ export default function Dashboard({navigation}) {
     [t('Cash In')]: 'Investplan',
     [t('Cash Out')]: 'Withdraw',
     [t('Nest Egg')]: 'NestEggScreen',
-    [t('Future Option')]: 'FutureScreen',
+    [t('Future Option')]: 'FutureOptionLastScreen',
     [t('Profit')]: 'ProfitScreen',
     [t('Wallet')]: 'WalletScreen',
+  };
+  useEffect(() => {
+    fetchAndStoreUserData();
+  }, []);
+
+  const fetchAndStoreUserData = async () => {
+    try {
+      const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
+      const response = await axios.get(
+        'https://coral.lunarsenterprises.com/wealthinvestment/user',
+        {
+          headers: {
+            user_id: user_id,
+          },
+        },
+      );
+
+      if (response.data.result && response?.data?.data?.length > 0) {
+        const userData = response?.data.data[0];
+        const currency = userData?.u_currency;
+
+        // Update AppStrings
+        AppStrings.USER_DATA = userData;
+        AppStrings.USER_CURRENCY = currency;
+
+        // Store only currency in AsyncStorage
+        await AsyncStorage.setItem('userCurrency', currency);
+        console.log('Currency stored in AsyncStorage:', currency);
+      } else {
+        console.log('Failed to retrieve user data:', response.data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error.message);
+    }
   };
 
   // Check if data populates correctly
@@ -309,7 +343,7 @@ export default function Dashboard({navigation}) {
               <Text style={styles.infoValue}>
                 {/* {convertedSharePrice} */}
                 {datahome?.share_prices}
-                </Text>
+              </Text>
             </View>
             <View style={styles.infoCard}>
               <View style={styles.titleWithImage}>
@@ -321,7 +355,7 @@ export default function Dashboard({navigation}) {
               <Text style={styles.infoValue}>
                 {/* {convertedOwnPrice} */}
                 {datahome?.own_shares}
-                </Text>
+              </Text>
             </View>
           </View>
         </View>
@@ -363,8 +397,7 @@ export default function Dashboard({navigation}) {
               />
               <Text style={styles.hgfText}>{item.h_industry}</Text>
               <Text style={styles.hgfValue}>
-                {item.h_growth}% | {t('Growth')}:{' '}
-                {item.h_last_year}
+                {item.h_growth}% | {t('Growth')}: {item.h_last_year}
               </Text>
             </View>
           )}

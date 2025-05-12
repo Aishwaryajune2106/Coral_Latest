@@ -76,13 +76,13 @@ const InvestmentReturns = ({route, navigation}) => {
         {/* Chart Section */}
         <View style={styles.chartContainer}>
           <Text style={styles.chartTitle}>
-            {t('Investment End by')} {formattedDuration}
+            {t('Investment End by')} {duration}
           </Text>
           <Text style={styles.chartPercentage}>{percentageReturn}</Text>
           <LineChart
             data={{
-              labels: chartData.labels,
-              datasets: chartData.datasets,
+              labels: chartData?.labels,
+              datasets: chartData?.datasets,
             }}
             width={Dimensions.get('window').width - 70}
             height={250} // Chart height
@@ -123,7 +123,7 @@ const InvestmentReturns = ({route, navigation}) => {
             </Text>
             <Text style={styles.detailItem}>
               <Text style={styles.colorBlockBlue}>⬤</Text> {t('End Date')} :{' '}
-              {formattedDuration}
+              {duration} years
             </Text>
             <Text style={styles.detailItem}>
               <Text style={styles.colorBlockOrange}>⬤</Text>{' '}

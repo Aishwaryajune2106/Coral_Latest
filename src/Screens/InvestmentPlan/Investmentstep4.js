@@ -46,6 +46,18 @@ const Investmentstep4 = ({navigation}) => {
     setReturnAmount,
     setPercentageReturn,
   } = useContext(CountryContext);
+  console.log(
+    personalDetails,
+    investmentAmount,
+    duration,
+    profitModal,
+    withdrawalFrequency,
+    returnAmount,
+    percentageReturn,
+    selectedOption,
+    'investmentPlan',
+  );
+  console.log('selectedOption', selectedOption);
 
   const [selectedOptions, setSelectedOptions] = useState(null);
   const [selectedNomineeOption, setSelectedNomineeOption] = useState(null);
@@ -56,7 +68,7 @@ const Investmentstep4 = ({navigation}) => {
   const [uploadedFileName, setUploadedFileName] = useState(null);
   const [loadingDownload, setLoadingDownload] = useState(false);
   const [loadingUpload, setLoadingUpload] = useState(false);
-  console.log(formattedDuration, 'hello this is time');
+  console.log(duration, 'hello this is time');
 
   const nomineeoptions = [
     {label: 'Lunar', value: 'Lunar'},
@@ -144,65 +156,98 @@ const Investmentstep4 = ({navigation}) => {
   };
 
   //..............INVEST API.....................//
+
   const [contract_id, setContract_id] = useState('');
   const handleDownload = async () => {
     setLoadingDownload(true);
 
-    const requestBody = {
-      bankAccount: selectedOptions.b_id,
-      clientInfo: {
-        clientName: personalDetails.fullName,
-        email: personalDetails.email,
-        nationalId: personalDetails.idproof,
-        passportId: personalDetails.idproof,
-        phone: personalDetails.phoneNumber,
-        residentialAddress: personalDetails.address,
-      },
-      investment: {
-        industry: 'any',
-        investment_amount: investmentAmount,
-        investment_duration: formattedDuration,
-        percentage: percentageReturn,
-        profit_model: profitModal,
-        project_name: 'any',
-        return_amount: returnAmount,
-        withdrawal_frequency: withdrawalFrequency,
-      },
-      nomineeDetails: {
-        contactNumber: selectedNomineeOption.mobile,
-        emiratesOrPassportId: selectedNomineeOption.emiatesId,
-        nomineeFullName: selectedNomineeOption.name,
-        relationship: selectedNomineeOption.relation,
-        residentialAddress: selectedNomineeOption.address,
-      },
-      securityOption: selectedOption,
-    };
-
-    console.log(requestBody, 'REQUESTTTT');
-
-    const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
-    const headers = {
-      'Content-Type': 'application/json',
-      user_id: user_id,
-    };
+    const nomineeSelected = selectedNomineeOption !== null;
 
     try {
+      // STEP 1: Fetch exchange rates from API
+      const exchangeRes = await axios.get(
+        'https://api.exchangerate-api.com/v4/latest/AED',
+      );
+      const rates = exchangeRes?.data?.rates;
+
+      // Replace 'INR' with your actual current investment currency code
+
+      const sourceCurrency = await AsyncStorage.getItem('userCurrency');
+      // Example: if investmentAmount is in INR
+      console.log(sourceCurrency, 'sourceCurrency');
+
+      const conversionRate = rates[sourceCurrency];
+
+      if (!conversionRate) {
+        throw new Error(`Exchange rate for ${sourceCurrency} not found`);
+      }
+
+      // STEP 2: Convert to AED
+      const convertedToAED = investmentAmount / conversionRate;
+      console.log(convertedToAED, 'convertedToAED');
+
+      const requestBody = {
+        bankAccount: selectedOptions?.b_id,
+        clientInfo: {
+          clientName: personalDetails?.fullName,
+          email: personalDetails?.email,
+          nationalId: personalDetails?.idproof,
+          passportId: personalDetails?.idproof,
+          phone: personalDetails?.phoneNumber,
+          residentialAddress: personalDetails?.address,
+        },
+        investment: {
+          industry: 'any',
+          investment_amount: convertedToAED?.toFixed(2), // Using converted amount
+          investment_duration: duration,
+          percentage: percentageReturn,
+          profit_model: profitModal,
+          project_name: 'any',
+          return_amount: returnAmount,
+          withdrawal_frequency: withdrawalFrequency,
+        },
+        nomineeDetails: nomineeSelected
+          ? {
+              contactNumber: selectedNomineeOption?.mobile || '',
+              emiratesOrPassportId: selectedNomineeOption?.emiatesId || '',
+              nomineeFullName: selectedNomineeOption?.name || '',
+              relationship: selectedNomineeOption?.relation || '',
+              residentialAddress: selectedNomineeOption?.address || '',
+            }
+          : {
+              contactNumber: '',
+              emiratesOrPassportId: '',
+              nomineeFullName: '',
+              relationship: '',
+              residentialAddress: '',
+            },
+        securityOption: selectedOption,
+      };
+
+      console.log(requestBody, 'REQUESTTTT');
+
+      const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
+      const headers = {
+        'Content-Type': 'application/json',
+        user_id: user_id,
+      };
+
       const response = await axios.post(
         'https://coral.lunarsenterprises.com/wealthinvestment/user/invest',
         requestBody,
         {headers: headers},
       );
 
-      if (response.data.result) {
+      if (response?.data?.result) {
         resetInvestmentStates();
-        const contractid = response.data.contract_id;
+        const contractid = response?.data?.contract_id;
         setContract_id(contractid);
-        const filePath = response.data.path;
+        const filePath = response?.data?.path;
         console.log('Download URL: ', filePath);
         Linking.openURL(filePath);
         setIsDownloaded(true);
       } else {
-        Alert.alert('Error', response.data.message || 'Something went wrong');
+        Alert.alert('Error', response?.data?.message || 'Something went wrong');
       }
     } catch (err) {
       console.error('Error during API call:', err);
@@ -222,167 +267,178 @@ const Investmentstep4 = ({navigation}) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Image source={AppImages.Investimg} style={styles.headerImage} />
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}>
-          <Image
-            source={AppImages.Leftarrow}
-            style={[
-              styles.backIcon,
-              i18n.language === 'ar' ? {transform: [{scaleX: -1}]} : {},
-            ]}
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>{t('Investment Combination')}</Text>
-      </View>
-
-      <View style={styles.whiteContainer}>
-        <View>
-          <View style={styles.greyContainer}>
-            <Text style={styles.stepText}>{t('Steps')} - 2/3</Text>
-            <TouchableOpacity style={styles.optionButton}>
-              <Text style={styles.optionText}>{t('Any')}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.securityContainer}>
-            <Image source={AppImages.Bank} style={styles.securityIcon} />
-            <Text style={styles.securityText}>{t('Bank Details')}</Text>
-          </View>
-
-          <View
-            style={{
-              backgroundColor: AppColors.Grey,
-              width: '100%',
-              borderWidth: 0.2,
-              marginVertical: 7,
-            }}></View>
-
-          <View style={{marginTop: 20}}>
-            {/* <Text style={styles.labelText}>Select Bank</Text> */}
-            <DropdownWithDeleteAndAdd
-              options={options}
-              selectedOption={selectedOptions}
-              onSelectOption={option => setSelectedOptions(option)}
+    <View style={{flex: 1}}>
+      <ScrollView contentContainerStyle={{paddingBottom: 100}}>
+        <View style={styles.header}>
+          <Image source={AppImages.Investimg} style={styles.headerImage} />
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}>
+            <Image
+              source={AppImages.Leftarrow}
+              style={[
+                styles.backIcon,
+                i18n.language === 'ar' ? {transform: [{scaleX: -1}]} : {},
+              ]}
             />
-          </View>
-          <View style={{marginTop: 20}}>
-            {/* <Text style={styles.labelText}>Select Nominee</Text> */}
-            <Dropdownforbank
-              options={nomineeoptions}
-              selectedOption={selectedNomineeOption}
-              onSelectOption={option => setSelectedNomineeOption(option)}
-            />
-          </View>
+          </TouchableOpacity>
+          <Text style={styles.headerText}>{t('Investment Combination')}</Text>
         </View>
-        {!isDownloaded ? (
-          <>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.nextButton}
-                onPress={handleDownload}
-                disabled={loadingDownload}>
-                {loadingDownload ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={AppColors.bordergreen}
-                  />
-                ) : (
-                  <>
-                    <Text style={styles.buttonText}>
-                      {t('Click To Download')}
-                    </Text>
-                    <Image
-                      source={AppImages.Download}
-                      style={styles.downloadImage}
-                    />
-                  </>
-                )}
+
+        <View style={styles.whiteContainer}>
+          <View>
+            <View style={styles.greyContainer}>
+              <Text style={styles.stepText}>{t('Steps')} - 2/3</Text>
+              <TouchableOpacity style={styles.optionButton}>
+                <Text style={styles.optionText}>{t('Any')}</Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.stepTextred}>
-              {t(
-                'DOWNLOAD THE FORM, SIGN IT, AND UPLOAD IT TO COMPLETE YOUR INVESTMENT',
-              )}
-            </Text>
-          </>
-        ) : (
-          <>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.nextButton}
-                onPress={handleUpload}
-                disabled={loadingUpload}>
-                {loadingUpload ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={AppColors.bordergreen}
-                  />
-                ) : (
-                  <>
-                    <Text style={styles.buttonText}>
-                      {t('Click To Upload')}
-                    </Text>
-                    <Image
-                      source={AppImages.Upload}
-                      style={styles.downloadImage}
-                    />
-                  </>
-                )}
-              </TouchableOpacity>
+
+            <View style={styles.securityContainer}>
+              <Image source={AppImages.Bank} style={styles.securityIcon} />
+              <Text style={styles.securityText}>{t('Bank Details')}</Text>
             </View>
-            {uploadedFilePath && uploadedFileName && (
-              <View style={styles.filecontain}>
-                <Text style={styles.uploadedFileText}>
-                  {t('Uploaded File')}: {uploadedFileName}
-                </Text>
+
+            <View
+              style={{
+                backgroundColor: AppColors.Grey,
+                width: '100%',
+                borderWidth: 0.2,
+                marginVertical: 7,
+              }}></View>
+
+            <View style={{marginTop: 20}}>
+              {/* <Text style={styles.labelText}>Select Bank</Text> */}
+              <DropdownWithDeleteAndAdd
+                options={options}
+                selectedOption={selectedOptions}
+                onSelectOption={option => setSelectedOptions(option)}
+              />
+            </View>
+            <View style={{marginTop: 20}}>
+              {/* <Text style={styles.labelText}>Select Nominee</Text> */}
+              <Dropdownforbank
+                options={nomineeoptions}
+                selectedOption={selectedNomineeOption}
+                onSelectOption={option => setSelectedNomineeOption(option)}
+              />
+            </View>
+          </View>
+          {!isDownloaded ? (
+            <>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.nextButton}
+                  onPress={handleDownload}
+                  disabled={loadingDownload}>
+                  {loadingDownload ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={AppColors.bordergreen}
+                    />
+                  ) : (
+                    <>
+                      <Text style={styles.buttonText}>
+                        {t('Click To Download')}
+                      </Text>
+                      <Image
+                        source={AppImages.Download}
+                        style={styles.downloadImage}
+                      />
+                    </>
+                  )}
+                </TouchableOpacity>
               </View>
-            )}
-            <View style={styles.buttonContainer}>
+              <Text style={styles.stepTextred}>
+                {t(
+                  'DOWNLOAD THE FORM, SIGN IT, AND UPLOAD IT TO COMPLETE YOUR INVESTMENT',
+                )}
+              </Text>
+            </>
+          ) : (
+            <>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.nextButton}
+                  onPress={handleUpload}
+                  disabled={loadingUpload}>
+                  {loadingUpload ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={AppColors.bordergreen}
+                    />
+                  ) : (
+                    <>
+                      <Text style={styles.buttonText}>
+                        {t('Click To Upload')}
+                      </Text>
+                      <Image
+                        source={AppImages.Upload}
+                        style={styles.downloadImage}
+                      />
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+              {uploadedFilePath && uploadedFileName && (
+                <View style={styles.filecontain}>
+                  <Text style={styles.uploadedFileText}>
+                    {t('Uploaded File')}: {uploadedFileName}
+                  </Text>
+                </View>
+              )}
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.nextButton}
+                  onPress={handleProceedToPayment}>
+                  <Text style={styles.buttonText}>
+                    {t('Proceed to Payment')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </View>
+
+        {/* Modal */}
+        <Modal
+          transparent={true}
+          visible={modalVisible}
+          animationType="fade"
+          onRequestClose={() => setModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
               <TouchableOpacity
-                style={styles.nextButton}
-                onPress={handleProceedToPayment}>
-                <Text style={styles.buttonText}>{t('Proceed to Payment')}</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-      </View>
-      {/* Modal */}
-      <Modal
-        transparent={true}
-        visible={modalVisible}
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeButtonText}>✕</Text>
-            </TouchableOpacity>
-            <Text style={styles.modalText}>
-              {t('Confirm to proceed with payment')}?
-            </Text>
-            <View style={styles.modalButtonsContainer}>
-              <TouchableOpacity
-                style={styles.cancelButton}
+                style={styles.closeButton}
                 onPress={() => setModalVisible(false)}>
-                <Text style={styles.cancelButtonText}>{t('Cancel')}</Text>
+                <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.proceedButton}
-                onPress={confirmPayment}>
-                <Text style={styles.proceedButtonText}>{t('Proceed')}</Text>
-              </TouchableOpacity>
+              <Text style={styles.modalText}>
+                {t('Confirm to proceed with payment')}?
+              </Text>
+              <View style={styles.modalButtonsContainer}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => setModalVisible(false)}>
+                  <Text style={styles.cancelButtonText}>{t('Cancel')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.proceedButton}
+                  onPress={confirmPayment}>
+                  <Text style={styles.proceedButtonText}>{t('Proceed')}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
-    </ScrollView>
+        </Modal>
+      </ScrollView>
+
+      <TouchableOpacity
+        style={styles.backToHomeButton}
+        onPress={() => navigation.navigate('DashBoardStack')}>
+        <Text style={styles.backToHomeText}>Back to Home</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
@@ -390,8 +446,6 @@ export default Investmentstep4;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-
     backgroundColor: AppColors.backwhite,
   },
   header: {
@@ -608,5 +662,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: AppColors.white,
     fontWeight: '500',
+  },
+  backToHomeButton: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    backgroundColor: AppColors.Yellow, // Yellow
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+  },
+
+  backToHomeText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

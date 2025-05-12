@@ -50,7 +50,7 @@ const Future = ({navigation}) => {
       setLoading(false);
     }
   };
-  
+
   // const [convertedbalancePrice, setConvertedbalancePrice] = useState(0);
   // const [currency, setCurrency] = useState('');
   // useEffect(() => {
@@ -118,8 +118,8 @@ const Future = ({navigation}) => {
               {/* <Text style={styles.dateText}>Today, 08 Sept 2019</Text> */}
               <Text style={styles.amountText}>
                 {/* {convertedbalancePrice}{" "}{currency} */}
-                {totalInvestment}{" "}AED
-                </Text>
+                {totalInvestment} AED
+              </Text>
             </View>
           </ImageBackground>
         </View>
@@ -127,6 +127,11 @@ const Future = ({navigation}) => {
         {/* Content */}
         <View style={styles.contentContainer}>
           <View>
+            {/* Text above the button */}
+            <Text style={styles.investLabel}>
+              Lock Current ROI upto 3 Months and then enjoy invest
+            </Text>
+
             <TouchableOpacity
               style={styles.withdrawButton}
               onPress={() => navigation.navigate('FutureStep1Screen')}>
@@ -337,6 +342,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: AppColors.Black,
     marginRight: 10,
+  },
+  investLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: AppColors.Blue,
+    marginTop: 50,
+    // marginBottom: 10,
+    textAlign: 'center',
   },
 });
 

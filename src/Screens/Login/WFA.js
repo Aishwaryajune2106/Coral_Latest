@@ -150,7 +150,7 @@ const WFA = ({navigation}) => {
           {t(
             'If you are facing any difficulties, please get in touch with us on',
           )}{' '}
-          <Text style={styles.whatsapp}>{t('Whatsapp')}</Text>.
+          <Text style={styles.whatsapp}>operations@coraluae.com</Text>.
         </Text>
       </View>
     </ScrollView>

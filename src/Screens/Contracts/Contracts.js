@@ -94,27 +94,38 @@ const Contracts = ({navigation}) => {
 
   console.log(contracts, 'contracts');
 
-  const renderItem = ({item}) => (
-    <TouchableOpacity
-      style={styles.card}
-      // onPress={{}}
-    >
-      <View style={styles.leftSection}>
-        <Image source={item.image} style={styles.roundImage} />
-        <View style={styles.textContainer}>
-          <Text style={styles.projectName}>{item.ui_project_name}</Text>
-          <Text style={styles.subCompany}>{item.ui_amount}</Text>
+  const renderItem = ({item}) => {
+    let buttonText = t('Terminate');
+
+    if (item.ui_status === 'completed') {
+      buttonText = 'Contract Completed';
+    } else if (
+      item.ui_request === 'termination' &&
+      item.ui_request_status === 'pending'
+    ) {
+      buttonText = 'Termination in Review';
+    }
+
+    return (
+      <TouchableOpacity style={styles.card}>
+        <View style={styles.leftSection}>
+          <Image source={item.image} style={styles.roundImage} />
+          <View style={styles.textContainer}>
+            <Text style={styles.projectName}>{item.ui_project_name}</Text>
+            <Text style={styles.subCompany}>{item.ui_amount}</Text>
+          </View>
         </View>
-      </View>
-      <View style={styles.rightSection}>
-        <TouchableOpacity
-          style={styles.terminateButton}
-          onPress={() => handleTerminatePress(item)}>
-          <Text style={styles.terminateText}>{t('Terminate')}</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
+        <View style={styles.rightSection}>
+          <TouchableOpacity
+            style={styles.terminateButton}
+            disabled={buttonText !== t('Terminate')} // Disable if not actively terminable
+            onPress={() => handleTerminatePress(item)}>
+            <Text style={styles.terminateText}>{buttonText}</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   const renderNomineeItem = ({item}) => (
     <View>
@@ -138,7 +149,7 @@ const Contracts = ({navigation}) => {
                 setSelectedItem(item); // Set selectedItem before transfer
                 confirmTransfer();
               } else {
-                navigation.navigate('AddNomineeScreen', {item});
+                navigation.navigate('NomineeListScreen', {item});
               }
             }}>
             <Text style={styles.terminateText}>
@@ -159,10 +170,13 @@ const Contracts = ({navigation}) => {
 
   const [customAlertVisible, setCustomAlertVisible] = useState(false);
   const [customAlertMessage, setCustomAlertMessage] = useState('');
+  const [terminatedItems, setTerminatedItems] = useState([]);
+
   const handleTerminatePress = item => {
     setSelectedItem(item);
     setIsTransfer(selectedTab === 'future');
     setModalVisible(true);
+    setTerminatedItems(prev => [...prev, item.ui_id]);
   };
 
   const confirmTerminationOrTransfer = () => {
@@ -314,6 +328,7 @@ const Contracts = ({navigation}) => {
             }}>
             <FlatList
               data={contracts}
+              showsVerticalScrollIndicator={false}
               keyExtractor={(item, index) =>
                 item.ui_id ? item.ui_id.toString() : index.toString()
               }
@@ -345,6 +360,7 @@ const Contracts = ({navigation}) => {
           }}>
           <FlatList
             data={contracts}
+            showsVerticalScrollIndicator={false}
             keyExtractor={(item, index) =>
               item.ui_id ? item.ui_id.toString() : index.toString()
             }

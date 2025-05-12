@@ -56,15 +56,11 @@ const Yourphoto = ({navigation}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleUpload = () => {
-    Alert.alert(
-      'Upload Your Photo',
-      'Choose an option',
-      [
-        {text: 'Take Photo', onPress: () => pickImage('camera')},
-        {text: 'Upload from Gallery', onPress: () => pickImage('gallery')},
-        {text: 'Cancel', style: 'cancel'},
-      ],
-    );
+    Alert.alert('Upload Your Photo', 'Choose an option', [
+      {text: 'Take Photo', onPress: () => pickImage('camera')},
+      {text: 'Upload from Gallery', onPress: () => pickImage('gallery')},
+      {text: 'Cancel', style: 'cancel'},
+    ]);
   };
 
   const pickImage = type => {
@@ -333,7 +329,7 @@ const Yourphoto = ({navigation}) => {
           {t(
             'If you are facing any difficulties, please get in touch with us on',
           )}{' '}
-          <Text style={styles.whatsapp}>{t('Whatsapp')}</Text>
+          <Text style={styles.whatsapp}>operations@coraluae.com</Text>
         </Text>
       </View>
 
@@ -355,7 +351,7 @@ const Yourphoto = ({navigation}) => {
         onConfirm={() => {
           setShowModal(false);
           if (modalTitle === 'Success') {
-            navigation.navigate('KyccheckScreen'); 
+            navigation.navigate('KyccheckScreen');
           }
         }}
       />

@@ -137,7 +137,7 @@ const Bank = ({navigation}) => {
             Acc: ******{String(item.b_account_no).slice(-4)}
           </Text>
           <Text style={styles.subCompany}>
-            {t('Currency')}: {item.b_branch}
+            {t('Branch')}: {item.b_branch}
           </Text>
           <Text style={styles.subCompany}>
             {t('Currency')}: {item.b_currency}

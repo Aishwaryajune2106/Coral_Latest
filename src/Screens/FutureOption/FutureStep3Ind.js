@@ -71,18 +71,35 @@ const FutureStep3Ind = ({route, navigation}) => {
 
   const handleLockPress = async () => {
     setLoading(true);
-    const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
-    const requestBody = {
-      amount: investmentAmount,
-      year: formattedDuration,
-      wf: withdrawalFrequency,
-      project: selectedCiIndustry,
-    };
     try {
+      const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
+      const sourceCurrency = await AsyncStorage.getItem('userCurrency');
+
+      // Fetch exchange rates with base AED
+      const exchangeResponse = await axios.get(
+        'https://api.exchangerate-api.com/v4/latest/AED',
+      );
+      const rates = exchangeResponse.data?.rates;
+
+      if (!rates || !sourceCurrency || !rates[sourceCurrency]) {
+        throw new Error('Unable to fetch currency conversion rate.');
+      }
+
+      const conversionRate = rates[sourceCurrency]; // how much 1 AED = in sourceCurrency
+      const convertedAmount = investmentAmount / conversionRate; // convert to AED
+      console.log(convertedAmount, 'convertedAmount');
+
+      const requestBody = {
+        amount: convertedAmount,
+        duration: duration,
+        wf: withdrawalFrequency,
+        project: selectedCiIndustry,
+        profit_model: profitModal,
+      };
+
       const response = await axios.post(
         'https://coral.lunarsenterprises.com/wealthinvestment/user/lock/period',
         requestBody,
-
         {
           headers: {
             user_id: user_id,
@@ -90,13 +107,13 @@ const FutureStep3Ind = ({route, navigation}) => {
           },
         },
       );
-      console.log(requestBody, 'requestBody');
 
+      console.log(requestBody, 'requestBodysskkyy');
+      console.log('API Response:', response?.data);
       if (response.data.result) {
-        console.log('API Response:', response.data);
         setModalVisible(true);
       } else {
-        alert(response.data.message || 'Something went wrong');
+        alert(response?.data?.message || 'Something went wrong');
       }
     } catch (error) {
       console.error('Error in API:', error);
@@ -132,7 +149,7 @@ const FutureStep3Ind = ({route, navigation}) => {
         {/* Chart Section */}
         <View style={styles.chartContainer}>
           <Text style={styles.chartTitle}>
-            {t('Investment End by')} {formattedDuration}
+            {t('Investment End by')} {duration} years
           </Text>
           <Text style={styles.chartPercentage}>{percentageReturn}</Text>
           <LineChart
@@ -183,7 +200,7 @@ const FutureStep3Ind = ({route, navigation}) => {
             </Text>
             <Text style={styles.detailItem}>
               <Text style={styles.colorBlockBlue}>⬤</Text> {t('End Date')} :{' '}
-              {formattedDuration}
+              {duration} years
             </Text>
             <Text style={styles.detailItem}>
               <Text style={styles.colorBlockOrange}>⬤</Text>{' '}

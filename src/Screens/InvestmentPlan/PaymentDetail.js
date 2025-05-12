@@ -266,198 +266,221 @@ const PaymentDetail = ({navigation}) => {
     }
   };
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Image source={AppImages.Investimg} style={styles.headerImage} />
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.navigate('DashBoardStack')}>
-          <Image source={AppImages.Leftarrow} style={[
-              styles.backIcon,
-              i18n.language === 'ar' ? {transform: [{scaleX: -1}]} : {},
-            ]}/>
-        </TouchableOpacity>
-        <Text style={styles.headerText}>{t('Investment Combination')}</Text>
-      </View>
+    <View style={{flex: 1}}>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <Image source={AppImages.Investimg} style={styles.headerImage} />
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.navigate('DashBoardStack')}>
+            <Image
+              source={AppImages.Leftarrow}
+              style={[
+                styles.backIcon,
+                i18n.language === 'ar' ? {transform: [{scaleX: -1}]} : {},
+              ]}
+            />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>{t('Investment Combination')}</Text>
+        </View>
 
-      {/* White Container */}
-      <View style={styles.whiteContainer}>
-        {/* Header Content */}
-        <TouchableOpacity
-          style={styles.headercontent}
-          onPress={() => setShowContactContainer(!showContactContainer)}>
-          <Text style={styles.headerTextconnect}>
-            {t('CONNECT WITH US BEFORE PAY')}
-          </Text>
-          <Image source={AppImages.Connect} style={styles.headerIcon} />
-        </TouchableOpacity>
+        {/* White Container */}
+        <View style={styles.whiteContainer}>
+          {/* Header Content */}
+          <TouchableOpacity
+            style={styles.headercontent}
+            onPress={() => setShowContactContainer(!showContactContainer)}>
+            <Text style={styles.headerTextconnect}>
+              {t('CONNECT WITH US BEFORE PAY')}
+            </Text>
+            <Image source={AppImages.Connect} style={styles.headerIcon} />
+          </TouchableOpacity>
 
-        {/* Contact Information */}
-        {showContactContainer && (
-          <View style={styles.contactContainer}>
-            <Text style={styles.contactText}>operations@coraluae.com</Text>
-            <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
-              <Image source={AppImages.Copygreen} style={styles.copyIcon} />
-            </TouchableOpacity>
-            {isCopied && (
-              <Text style={styles.copiedText}>Copied Successfully</Text>
-            )}
-            <Text style={styles.contactText}>Contact: 703450099</Text>
-          </View>
-        )}
-
-        {/* Bank Transfer Section */}
-        <TouchableOpacity
-          style={styles.tabContainer}
-          onPress={() => setShowBankDetails(!showBankDetails)}>
-          <Text style={styles.tabText}>{t('BANK TRANSFER')}</Text>
-          <Image source={AppImages.Blackbank} style={styles.bankIcon} />
-        </TouchableOpacity>
-
-        {/* Bank Details to Submit Button */}
-        {showBankDetails && (
-          <>
-            {/* Bank Details */}
+          {/* Contact Information */}
+          {showContactContainer && (
             <View style={styles.contactContainer}>
-              <Text style={styles.bankDetailText}>
-                Bank Name: CORAL WEALTH INVESTMENT IN HEALTHCARE ENTERPRISES &
-                DEVELOPMENT CO. L.L.C
+              <Text style={styles.contactText}>operations@coraluae.com</Text>
+              <TouchableOpacity style={styles.copyButton} onPress={handleCopy}>
+                <Image source={AppImages.Copygreen} style={styles.copyIcon} />
+              </TouchableOpacity>
+              {isCopied && (
+                <Text style={styles.copiedText}>Copied Successfully</Text>
+              )}
+
+              <Text style={styles.contactText}>
+                If facing any issue,{' '}
+                <Text
+                  style={{color: 'blue', textDecorationLine: 'underline'}}
+                  onPress={() => navigation.navigate('ContactusScreen')}>
+                  Raise a Ticket
+                </Text>
               </Text>
-              <Text style={styles.bankDetailText}>A/c: 9467791855</Text>
-              <Text style={styles.bankDetailText}>
-                IBAN: AE330860000009467791855
-              </Text>
-              <Text style={styles.bankDetailText}>SWIFT Code: WIOBAEADXXX</Text>
-              {/* <Text style={styles.bankDetailText}>
+            </View>
+          )}
+
+          {/* Bank Transfer Section */}
+          <TouchableOpacity
+            style={styles.tabContainer}
+            onPress={() => setShowBankDetails(!showBankDetails)}>
+            <Text style={styles.tabText}>{t('BANK TRANSFER')}</Text>
+            <Image source={AppImages.Blackbank} style={styles.bankIcon} />
+          </TouchableOpacity>
+
+          {/* Bank Details to Submit Button */}
+          {showBankDetails && (
+            <>
+              {/* Bank Details */}
+              <View style={styles.contactContainer}>
+                <Text style={styles.bankDetailText}>
+                  Bank Name: CORAL WEALTH INVESTMENT IN HEALTHCARE ENTERPRISES &
+                  DEVELOPMENT CO. L.L.C
+                </Text>
+                <Text style={styles.bankDetailText}>A/c: 9467791855</Text>
+                <Text style={styles.bankDetailText}>
+                  IBAN: AE330860000009467791855
+                </Text>
+                <Text style={styles.bankDetailText}>
+                  SWIFT Code: WIOBAEADXXX
+                </Text>
+                {/* <Text style={styles.bankDetailText}>
                 Branch: Dubai Main Branch
               </Text> */}
-              <TouchableOpacity
-                style={styles.copyButton}
-                onPress={copyToClipboard}>
-                <Image source={AppImages.Copyblack} style={styles.copyIcon} />
-              </TouchableOpacity>
-            </View>
-            {/* Clipboard Icon */}
-
-            {/* Payment Instructions */}
-            <Text style={styles.paymentInstructions}>
-              {t(
-                'After making the payment, upload the payment receipt. If the screen closes, you can upload it later in your profile',
-              )}
-            </Text>
-
-            {/* Upload Receipt Section */}
-            <TouchableOpacity
-              style={styles.uploadButton}
-              onPress={handleUploadReceipt}>
-              <Text style={styles.uploadButtonText}>
-                {t('UPLOAD YOUR RECEIPT')}
-              </Text>
-              <Image source={AppImages.Upload} style={styles.uploadIcon} />
-            </TouchableOpacity>
-
-            {/* Uploaded File Name */}
-            {receiptUploaded && (
-              <TextInput
-                style={styles.fileNameInput}
-                value={uploadedFile}
-                editable={false}
-              />
-            )}
-
-            {/* Submit Button */}
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleSubmit}>
-              <Text style={styles.submitButtonText}>{t('SUBMIT')}</Text>
-            </TouchableOpacity>
-          </>
-        )}
-
-        {/* Online Payment Section */}
-        <TouchableOpacity
-          style={styles.onlinePaymentContainer}
-          onPress={handleOnlinePayment}>
-          <Text style={styles.onlinePaymentText}>{t('ONLINE PAYMENT')}</Text>
-          <Image source={AppImages.stripe} style={styles.stripeIcon} />
-        </TouchableOpacity>
-      </View>
-      {/* Modal Section */}
-      <Modal
-        transparent={true}
-        visible={showModal}
-        animationType="slide"
-        onRequestClose={() => setShowModal(false)}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalText}>
-              {t(
-                'Your Document has been sent for verification, you can track your growth after 24hrs',
-              )}
-            </Text>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => {
-                setShowModal(false);
-                navigation.navigate('DashBoardStack');
-              }}>
-              <Text style={styles.modalButtonText}>{t('Go to Home')}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-      {/* //...........Modal section 2.........// */}
-      <Modal
-        transparent={true}
-        visible={showPaymentModal}
-        animationType="slide"
-        onRequestClose={() => setShowPaymentModal(false)}>
-        <TouchableWithoutFeedback onPress={() => setShowPaymentModal(false)}>
-          <View style={styles.modalContainer1}>
-            <View style={styles.modalContent1}>
-              <Text style={styles.modalHeader}>Add Card</Text>
-
-              <View style={styles.modalContainer1}>
-                <CardField
-                  postalCodeEnabled={true}
-                  placeholders={{
-                    number: '4242 4242 4242 4242',
-                  }}
-                  cardStyle={{
-                    backgroundColor: 'grey',
-                    textColor: '#000000',
-                  }}
-                  style={{
-                    width: '100%',
-                    height: 50,
-                    marginVertical: 50,
-                  }}
-                  onCardChange={cardDetails => {
-                    setCardNumber(cardDetails);
-                  }}
-                  onFocus={focusedField => {
-                    console.log('Focused Field:', focusedField);
-                  }}
-                />
+                <TouchableOpacity
+                  style={styles.copyButton}
+                  onPress={copyToClipboard}>
+                  <Image source={AppImages.Copyblack} style={styles.copyIcon} />
+                </TouchableOpacity>
               </View>
+              {/* Clipboard Icon */}
+
+              {/* Payment Instructions */}
+              <Text style={styles.paymentInstructions}>
+                {t(
+                  'After making the payment, upload the payment receipt. If the screen closes, you can upload it later in your profile',
+                )}
+              </Text>
+
+              {/* Upload Receipt Section */}
               <TouchableOpacity
-                style={styles.payButton}
-                onPress={handlePayment}>
-                <Text style={styles.payButtonText}>Pay {investmentAmount}</Text>
+                style={styles.uploadButton}
+                onPress={handleUploadReceipt}>
+                <Text style={styles.uploadButtonText}>
+                  {t('UPLOAD YOUR RECEIPT')}
+                </Text>
+                <Image source={AppImages.Upload} style={styles.uploadIcon} />
+              </TouchableOpacity>
+
+              {/* Uploaded File Name */}
+              {receiptUploaded && (
+                <TextInput
+                  style={styles.fileNameInput}
+                  value={uploadedFile}
+                  editable={false}
+                />
+              )}
+
+              {/* Submit Button */}
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleSubmit}>
+                <Text style={styles.submitButtonText}>{t('SUBMIT')}</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {/* Online Payment Section */}
+          <TouchableOpacity
+            style={styles.onlinePaymentContainer}
+            onPress={handleOnlinePayment}>
+            <Text style={styles.onlinePaymentText}>{t('ONLINE PAYMENT')}</Text>
+            <Image source={AppImages.stripe} style={styles.stripeIcon} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Modal Section */}
+        <Modal
+          transparent={true}
+          visible={showModal}
+          animationType="slide"
+          onRequestClose={() => setShowModal(false)}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalText}>
+                {t(
+                  'Your Document has been sent for verification, you can track your growth after 24hrs',
+                )}
+              </Text>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => {
+                  setShowModal(false);
+                  navigation.navigate('DashBoardStack');
+                }}>
+                <Text style={styles.modalButtonText}>{t('Go to Home')}</Text>
               </TouchableOpacity>
             </View>
           </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-      <CustomAlert
-        visible={alertVisible}
-        onClose={() => {
-          navigation.navigate('DashBoardStack');
-        }}
-        title={alertTitle}
-        message={alertMessage}
-      />
-    </ScrollView>
+        </Modal>
+        {/* //...........Modal section 2.........// */}
+        <Modal
+          transparent={true}
+          visible={showPaymentModal}
+          animationType="slide"
+          onRequestClose={() => setShowPaymentModal(false)}>
+          <TouchableWithoutFeedback onPress={() => setShowPaymentModal(false)}>
+            <View style={styles.modalContainer1}>
+              <View style={styles.modalContent1}>
+                <Text style={styles.modalHeader}>Add Card</Text>
+
+                <View style={styles.modalContainer1}>
+                  <CardField
+                    postalCodeEnabled={true}
+                    placeholders={{
+                      number: '4242 4242 4242 4242',
+                    }}
+                    cardStyle={{
+                      backgroundColor: 'grey',
+                      textColor: '#000000',
+                    }}
+                    style={{
+                      width: '100%',
+                      height: 50,
+                      marginVertical: 50,
+                    }}
+                    onCardChange={cardDetails => {
+                      setCardNumber(cardDetails);
+                    }}
+                    onFocus={focusedField => {
+                      console.log('Focused Field:', focusedField);
+                    }}
+                  />
+                </View>
+                <TouchableOpacity
+                  style={styles.payButton}
+                  onPress={handlePayment}>
+                  <Text style={styles.payButtonText}>
+                    Pay {investmentAmount}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+        <CustomAlert
+          visible={alertVisible}
+          onClose={() => {
+            navigation.navigate('DashBoardStack');
+          }}
+          title={alertTitle}
+          message={alertMessage}
+        />
+      </ScrollView>
+      <TouchableOpacity
+        style={styles.backToHomeButton}
+        onPress={() => navigation.navigate('Home')}>
+        <Text style={styles.backToHomeText}>Back to Home</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
@@ -465,7 +488,7 @@ export default PaymentDetail;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    paddingBottom: 100,
     backgroundColor: AppColors.backwhite,
   },
   header: {
@@ -795,5 +818,20 @@ const styles = StyleSheet.create({
   dropdownIcon: {
     width: 20,
     height: 20,
+  },
+  backToHomeButton: {
+    position: 'absolute',
+    bottom: 30,
+    alignSelf: 'center',
+    backgroundColor: AppColors.Yellow, // Yellow
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+  },
+
+  backToHomeText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

@@ -96,7 +96,7 @@ const Cwi_Security = ({navigation}) => {
   };
 
   const options = [
-    {label: 'Notarization', value: 'Notarization'},
+    {label: 'Agreement', value: 'Notarization'},
     {label: 'Shares', value: 'Shares'},
   ];
 

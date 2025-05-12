@@ -78,7 +78,7 @@ const InvestReturnIndividual = ({route, navigation}) => {
         {/* Chart Section */}
         <View style={styles.chartContainer}>
           <Text style={styles.chartTitle}>
-            {t('Investment End by')} {formattedDuration}
+            {t('Investment End by')} {duration} years
           </Text>
           <Text style={styles.chartPercentage}>{percentageReturn}</Text>
           <LineChart
@@ -129,7 +129,7 @@ const InvestReturnIndividual = ({route, navigation}) => {
             </Text>
             <Text style={styles.detailItem}>
               <Text style={styles.colorBlockBlue}>⬤</Text> {t('End Date')} :{' '}
-              {formattedDuration}
+              {duration} years
             </Text>
             <Text style={styles.detailItem}>
               <Text style={styles.colorBlockOrange}>⬤</Text> {t('Investment Mode')} :

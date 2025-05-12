@@ -155,7 +155,7 @@ const Wallet = ({navigation}) => {
   //...............wallet api.................//
 
   const [transactions, setTransactions] = useState([]);
-
+  const [walletAmount, setWalletAmount] = useState(0);
   useEffect(() => {
     const fetchTransactions = async () => {
       const userId = await AsyncStorage.getItem(AppStrings.USER_ID);
@@ -172,6 +172,7 @@ const Wallet = ({navigation}) => {
 
         if (response.data.result) {
           setTransactions(response.data.data);
+          setWalletAmount(response.data.wallet);
           console.log('Updated Transactions State:', response.data.data); // Debugging: Check state update
         } else {
           setError('Failed to fetch transactions');
@@ -245,52 +246,6 @@ const Wallet = ({navigation}) => {
     }
   };
 
-  // const [convertedbalancePrice, setConvertedbalancePrice] = useState(0);
-  // const [currency, setCurrency] = useState('');
-  // useEffect(() => {
-  //   const fetchAndCalculatePrices = async () => {
-  //     const {convertedbalancePrice} = await calculateConvertedPrices();
-  //     setConvertedbalancePrice(convertedbalancePrice);
-  //   };
-
-  //   if (transactions.length > 0) {
-  //     fetchAndCalculatePrices();
-  //   }
-  // }, [transactions]); // Runs when transactions change
-
-  // // Function to calculate the wallet balance based on the stored rate
-  // const calculateConvertedPrices = async () => {
-  //   try {
-  //     const currencyRate = await AsyncStorage.getItem('userCurrencyRate');
-  //     const currency = await AsyncStorage.getItem('userCurrency');
-  //     setCurrency(currency);
-  //     const rate = JSON.parse(currencyRate);
-
-  //     console.log(rate, 'rate');
-  //     console.log(currency, 'currency');
-
-  //     if (rate && transactions.length > 0) {
-  //       // Sum up all transaction amounts
-  //       const totalBalance = transactions.reduce(
-  //         (sum, txn) => sum + parseFloat(txn.w_amount || 0),
-  //         0,
-  //       );
-
-  //       const convertedbalancePrice = rate * totalBalance;
-
-  //       console.log(`Converted balance Price: ${convertedbalancePrice}`);
-
-  //       return {convertedbalancePrice};
-  //     } else {
-  //       console.log('Rate not found or transactions empty in AsyncStorage');
-  //       return {convertedbalancePrice: 0};
-  //     }
-  //   } catch (error) {
-  //     console.error('Error retrieving rate from AsyncStorage:', error);
-  //     return {convertedbalancePrice: 0};
-  //   }
-  // };
-
   return (
     <View style={styles.container}>
       <ScrollView
@@ -305,15 +260,7 @@ const Wallet = ({navigation}) => {
               <Text style={styles.balanceText1}>
                 {t('Today')}, {moment().format('DD MMM YYYY')}
               </Text>
-              <Text style={styles.amountText}>
-                {transactions > 0
-                  ? // ? `${convertedbalancePrice.toFixed(2)} ${currency}`
-                    `${transactions?.reduce(
-                      (sum, txn) => sum + parseFloat(txn.w_amount || 0),
-                      0,
-                    )} `
-                  : '0'}
-              </Text>
+              <Text style={styles.amountText}>{walletAmount}</Text>
 
               {/* <Text style={styles.balanceText1}>
                 Up by 2% profit from last month
