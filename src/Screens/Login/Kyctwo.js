@@ -49,15 +49,17 @@ const Kyctwo = ({navigation}) => {
           console.log('User cancelled image picker');
         } else if (response.errorCode) {
           console.error('Image Picker Error:', response.errorMessage);
-        } else {
+        } else if (response?.assets && response.assets.length > 0) {
           const imageData = response.assets[0];
           const imageDetails = {
             uri: imageData.uri,
             type: imageData.type,
-            name: imageData.fileName,
+            name: imageData.fileName || 'photo.jpg', // fallback name
             size: imageData.fileSize,
           };
-          setFrontImage(imageDetails); // Set the front image with all the details
+          setFrontImage(imageDetails);
+        } else {
+          console.log('Unexpected response:', response);
         }
       });
     } else if (type === 'gallery') {

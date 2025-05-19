@@ -30,6 +30,8 @@ const CreateAccount = ({navigation}) => {
   const [currency, setCurrency] = useState('JPY');
   const [showPassword, setShowPassword] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [readyToInvest, setReadyToInvest] = useState(false);
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
@@ -53,6 +55,20 @@ const CreateAccount = ({navigation}) => {
     Keyboard.dismiss();
     if (!name || !email || !mobile || !password || !confirmPassword) {
       showModal('Error', 'Please fill in all fields.');
+      return;
+    }
+    if (!termsAccepted) {
+      showModal(
+        'Terms Required',
+        'Please accept the Terms and Conditions to proceed.',
+      );
+      return;
+    }
+    if (!readyToInvest) {
+      showModal(
+        'Confirmation Required',
+        'Please confirm that you agree to join CWI Private Investor Group.',
+      );
       return;
     }
 
@@ -257,6 +273,80 @@ const CreateAccount = ({navigation}) => {
                 onChangeText={setReferralCode}
               />
             </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginVertical: 10,
+                marginLeft: 20,
+              }}>
+              <TouchableOpacity
+                onPress={() => setTermsAccepted(!termsAccepted)}
+                style={{
+                  height: 20,
+                  width: 20,
+                  borderWidth: 1,
+                  borderColor: AppColors.white,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 10,
+                }}>
+                {termsAccepted && (
+                  <View
+                    style={{
+                      height: 12,
+                      width: 12,
+                      backgroundColor: AppColors.white,
+                    }}
+                  />
+                )}
+              </TouchableOpacity>
+              <Text style={{flex: 1, color: AppColors.white}}>
+                I agree to the{' '}
+                <Text
+                  style={{
+                    color: AppColors.white,
+                    textDecorationLine: 'underline',
+                  }}
+                  onPress={() => navigation.navigate('PrivacyScreen')}>
+                  Terms and Conditions
+                </Text>
+              </Text>
+            </View>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginVertical: 10,
+                marginLeft: 20,
+              }}>
+              <TouchableOpacity
+                onPress={() => setReadyToInvest(!readyToInvest)}
+                style={{
+                  height: 20,
+                  width: 20,
+                  borderWidth: 1,
+                  borderColor: AppColors.white,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 10,
+                }}>
+                {readyToInvest && (
+                  <View
+                    style={{
+                      height: 12,
+                      width: 12,
+                      backgroundColor: AppColors.white,
+                    }}
+                  />
+                )}
+              </TouchableOpacity>
+              <Text style={{flex: 1, color: AppColors.white}}>
+                I agree to join CWI Private Investor Group
+              </Text>
+            </View>
+
             <TouchableOpacity style={styles.button} onPress={handleRegister}>
               {loading ? (
                 <Text style={styles.buttonText}>{t('Registering...')}</Text>
@@ -266,7 +356,7 @@ const CreateAccount = ({navigation}) => {
             </TouchableOpacity>
 
             <Text style={styles.footerText}>
-              {t('Already have an account')}?{" "}
+              {t('Already have an account')}?{' '}
               <Text
                 style={styles.link}
                 onPress={() => navigation.navigate('Login')}>

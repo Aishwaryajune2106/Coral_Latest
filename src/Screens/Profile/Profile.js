@@ -152,7 +152,14 @@ export default function Profile({navigation}) {
           style={styles.backgroundImage}
         />
         <View style={styles.profileSection}>
-          <Image source={AppImages.Aavatar} style={styles.avatar} />
+          {/* <Image
+            source={{
+              uri: user?.u_profile_pic
+                ? `https://coral.lunarsenterprises.com/${user.u_profile_pic}`
+                : AppImages.Aavatar, // fallback image if user pic is not available
+            }}
+            style={styles.avatar}
+          /> */}
           <TouchableOpacity
             style={styles.editIcon}
             onPress={() => navigation.navigate('EditProfileScreen')}>
@@ -196,10 +203,21 @@ export default function Profile({navigation}) {
           style={styles.row}
           onPress={() => navigation.navigate('KycviewScreen')}>
           <Image source={AppImages.Notifyicon} style={styles.rowIcon} />
+
           <Text style={styles.rowText}>{t('KYC')}</Text>
-          <Image source={AppImages.Kycverify} style={styles.rightIcon} />
+
+          <Image
+            source={
+              user?.u_kyc === 'rejected'
+                ? AppImages.Rejected // red icon
+                : user?.u_kyc === 'pending'
+                ? AppImages.PendingIcon // yellow icon
+                : AppImages.Verified // green icon
+            }
+            style={styles.rightIcon}
+          />
+
           <Text style={styles.rowText}>
-            {' '}
             {user?.u_kyc === 'pending'
               ? 'In Review'
               : user?.u_kyc === 'rejected'
@@ -340,6 +358,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     flex: 1,
     fontWeight: '500',
+    left: 10,
   },
   rightText: {
     fontSize: 14,
@@ -347,8 +366,9 @@ const styles = StyleSheet.create({
     color: AppColors.Blue,
   },
   rightIcon: {
-    width: 20,
-    height: 20,
+    width: 30,
+    height: 30,
+
     resizeMode: 'contain',
   },
   logoutButton: {

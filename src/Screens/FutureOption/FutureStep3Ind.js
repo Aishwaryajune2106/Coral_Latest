@@ -191,7 +191,7 @@ const FutureStep3Ind = ({route, navigation}) => {
           <Image source={AppImages.Profit} style={styles.profitIcon} />
           <Text style={styles.profitText}>{t('Estimated Profit Growth')}</Text>
           <Text style={styles.profitValue}>
-            {returnAmount}({percentageReturn})
+            {returnAmount}(AED)({percentageReturn})
           </Text>
           <View style={styles.detailsList}>
             <Text style={styles.detailItem}>

@@ -415,7 +415,7 @@ const Cwi_Upload = ({navigation}) => {
                 setShowModal(false);
                 navigation.navigate('DashBoardStack');
               }}>
-              <Text style={styles.modalButtonText}>{t('Go to Home')}</Text>
+              <Text style={styles.modalButtonText}>{t('DashBoardStack')}</Text>
             </TouchableOpacity>
           </View>
         </View>

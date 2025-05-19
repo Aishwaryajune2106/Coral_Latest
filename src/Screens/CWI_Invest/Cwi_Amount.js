@@ -80,34 +80,66 @@ const Cwi_Amount = ({navigation, route}) => {
     {label: 'Yearly', value: 'Yearly'},
   ];
 
-  const validateFields = () => {
-    if (!investmentAmount || parseFloat(investmentAmount) < 200000) {
-      alert('Investment Amount must be at least 2,00,000 AED.');
-      return false;
-    }
-    if (!duration) {
-      alert('Please select a duration.');
-      return false;
-    }
-    return true;
-  };
-  const validateEndDate = selectedDate => {
-    const today = new Date();
-    const oneYearFromNow = new Date(today.setFullYear(today.getFullYear() + 1));
+  const validateFields = async () => {
+    setIsLoading(true);
 
-    if (selectedDate >= oneYearFromNow) {
-      setDateError('');
-      return true;
-    } else {
-      setDateError(
-        'End date should be more than or equal to 1 year from today',
+    try {
+      const response = await fetch(
+        'https://api.exchangerate-api.com/v4/latest/AED',
       );
-      return false;
+      const data = await response.json();
+
+      const selectedCurrency = userCurrency;
+      const rate = data?.rates[selectedCurrency];
+
+      if (!rate) {
+        setCustomAlert({
+          visible: true,
+          title: 'Error',
+          message: `Currency ${selectedCurrency} not supported.`,
+        });
+        setIsLoading(false);
+        return null;
+      }
+
+      const amountInAED = parseFloat(investmentAmount) / rate;
+      console.log('Converted AED Amount:', amountInAED);
+
+      if (isNaN(amountInAED) || amountInAED < 52000) {
+        setCustomAlert({
+          visible: true,
+          title: 'Error',
+          message: 'Investment Amount must be at least 52,000 AED.',
+        });
+        setIsLoading(false);
+        return null;
+      }
+
+      if (!duration || isNaN(duration) || parseInt(duration) < 1) {
+        setCustomAlert({
+          visible: true,
+          title: 'Error',
+          message: 'Duration must be at least 1 year.',
+        });
+        setIsLoading(false);
+        return null;
+      }
+
+      setIsLoading(false);
+      return amountInAED.toFixed(2); // Return the converted AED value
+    } catch (error) {
+      setCustomAlert({
+        visible: true,
+        title: 'Error',
+        message: 'Failed to fetch exchange rate.',
+      });
+      setIsLoading(false);
+      return null;
     }
   };
 
   const [exchangeRate, setExchangeRate] = useState(null);
-  const [userCurrency, setUserCurrency] = useState('AED'); 
+  const [userCurrency, setUserCurrency] = useState('AED');
 
   useEffect(() => {
     const fetchExchangeRate = async () => {
@@ -156,77 +188,114 @@ const Cwi_Amount = ({navigation, route}) => {
     fetchUserCurrency();
   }, []);
 
-  //............handleNext...............//
-
-  const handleNext = async () => {
-    if (validateFields()) {
-      setIsLoading(true);
-      try {
-        await fetchInvestmentData();
-        setIsLoading(false);
-        navigation.navigate('CwiSecurityScreen', {
-          chartData: chartData,
-          returnAmount: returnAmount,
-          percentageReturn: percentageReturn,
-        });
-      } catch (error) {
-        setIsLoading(false);
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
-      }
-    }
-  };
-
   //..................Calculator Api..................//
-
-  const datagraph = {
-    amount: investmentAmount,
-    duration: duration,
-    wf: withdrawalFrequency,
-    project: selectedInvestment.fi_industries,
-    platform: 'mobile',
-  };
 
   useEffect(() => {
     fetchInvestmentData();
   }, [investmentAmount, duration, withdrawalFrequency]);
+
   useEffect(() => {
     handleReset();
   }, []);
 
-  const fetchInvestmentData = async () => {
+  const fetchInvestmentData = async convertedAEDAmount => {
+    const payload = {
+      amount: convertedAEDAmount ?? investmentAmount,
+      duration: duration,
+      project: selectedInvestment?.name,
+      platform: 'mobile',
+      wf: withdrawalFrequency,
+    };
     try {
       const response = await axios.post(
         'https://coral.lunarsenterprises.com/wealthinvestment/user/calculator',
-        {
-          amount: investmentAmount,
-          duration: duration,
-          project: selectedInvestment.name,
-          platform: 'mobile',
-        },
+        payload,
+      );
+      const {result, return_amount, percentage} = response.data;
+
+      console.log('API Response:', response.data);
+      // Show alert if result is false or missing required fields
+      if (!result || !return_amount || !percentage) {
+        setCustomAlert({
+          visible: true,
+          title: 'No Data Found',
+          message: 'No data found for the provided inputs.',
+        });
+        return {};
+      }
+
+      const parsedReturnAmount = parseFloat(return_amount);
+
+      if (isNaN(parsedReturnAmount)) {
+        alert('Invalid return amount');
+        return {};
+      }
+
+      setReturnAmount(return_amount);
+      setPercentageReturn(percentage);
+
+      const years = ['2024', '2025', '2026', '2027', '2028', '2029'];
+
+      // Simulate growth (in absence of backend data)
+      const growth = Array.from(
+        {length: years.length},
+        (_, index) => parsedReturnAmount * ((index + 1) * 0.05),
       );
 
-      const {return_amount, percentage} = response.data;
-      if (return_amount) {
-        setReturnAmount(return_amount);
-        setPercentageReturn(percentage);
-        setChartData({
-          labels: ['2024', '2025', '2026', '2027', '2028', '2029'],
-          datasets: [
-            {
-              data: [
-                return_amount * 0.05,
-                return_amount * 0.1,
-                return_amount * 0.15,
-              ],
-              color: (opacity = 1) => `rgba(0, 128, 0, ${opacity})`,
-              strokeWidth: 2,
-            },
-          ],
-        });
-      }
+      const truncatedNumbers = growth.map(Math.trunc);
+      console.log('Growth Array:', truncatedNumbers);
+
+      const chart = {
+        labels: years,
+        datasets: [
+          {
+            data: truncatedNumbers,
+            color: (opacity = 1) => `rgba(0, 128, 0, ${opacity})`,
+            strokeWidth: 2,
+          },
+        ],
+      };
+
+      setChartData(chart);
+
+      const profit = parsedReturnAmount - parseFloat(investmentAmount);
+      setProfitGrowth(`$${profit.toFixed(2)} (${percentage})`);
+
+      return {
+        return_amount,
+        chart,
+        percentage,
+      };
     } catch (error) {
       console.error('Error fetching investment data:', error);
+      alert('Error fetching investment data');
+    }
+  };
+
+  //............handleNext...............//
+
+  const handleNext = async () => {
+    const convertedAED = await validateFields(); // Awaited just like in first function
+    if (convertedAED) {
+      setIsLoading(true);
+      try {
+        // Fetch investment data using convertedAED amount
+        const {return_amount, chart, percentage} = await fetchInvestmentData(
+          convertedAED,
+        );
+
+        setIsLoading(false);
+
+        navigation.navigate('CwiSecurityScreen', {
+          chartData: chart,
+          returnAmount: return_amount,
+          percentageReturn: percentage,
+        });
+      } catch (error) {
+        setIsLoading(false);
+        console.error('Error in handling next step:', error);
+        alert('An error occurred. Please try again.');
+      }
     }
   };
 

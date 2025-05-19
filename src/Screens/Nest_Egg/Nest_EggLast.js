@@ -28,7 +28,7 @@ const Nest_EggLast = ({navigation}) => {
     profit: 0,
     data: [],
   });
-
+  const [userCurrency, setUserCurrency] = useState('');
   const flexibleData = [
     {
       id: '1',
@@ -98,30 +98,52 @@ const Nest_EggLast = ({navigation}) => {
 
   const fetchData = async () => {
     const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
-    console.log(user_id, 'user');
+    const currency = await AsyncStorage.getItem('userCurrency');
+    setUserCurrency(currency || 'AED'); // default fallback
 
     try {
       const response = await axios.get(
         'https://coral.lunarsenterprises.com/wealthinvestment/user/nestegg/list',
         {
-          headers: {
-            user_id: user_id,
-          },
+          headers: {user_id: user_id},
         },
       );
-      console.log('API Response:', response.data);
+
       if (response.data.result) {
         setApiData({
           balance: response.data.balance,
           profit: response.data.profit,
           data: response.data.data,
         });
-        console.log(response.data.message);
+
+        setTimeout(() => {
+          convertBalanceToUserCurrency(response.data.balance, currency);
+        }, 100);
       } else {
         console.log(response.data.message);
       }
     } catch (error) {
       console.error('Error fetching API data:', error);
+    }
+  };
+
+  const [convertedBalance, setConvertedBalance] = useState(null);
+
+  const convertBalanceToUserCurrency = async (balance, currency) => {
+    try {
+      const exchangeResponse = await axios.get(
+        'https://api.exchangerate-api.com/v4/latest/AED',
+      );
+      const rates = exchangeResponse.data?.rates;
+      if (rates && rates[currency]) {
+        const rate = rates[currency];
+        const converted = balance * rate;
+        setConvertedBalance(converted.toFixed(2));
+      } else {
+        console.warn('Exchange rate for user currency not available');
+      }
+    } catch (error) {
+      console.error('Currency conversion failed:', error);
     }
   };
 
@@ -137,49 +159,6 @@ const Nest_EggLast = ({navigation}) => {
     }
     return [styles.planButton];
   };
-  // const [convertedbalancePrice, setConvertedbalancePrice] = useState(0);
-  // const [currency, setCurrency] = useState('');
-  // useEffect(() => {
-  //   const fetchAndCalculatePrices = async () => {
-  //     const {convertedbalancePrice} = await calculateConvertedPrices();
-
-  //     setConvertedbalancePrice(convertedbalancePrice);
-  //   };
-
-  //   fetchAndCalculatePrices();
-  // }, [apiData]);
-  // // Function to calculate the wallet balance based on the stored rate
-  // const calculateConvertedPrices = async () => {
-  //   try {
-  //     const currencyRate = await AsyncStorage.getItem('userCurrencyRate');
-  //     const currency = await AsyncStorage.getItem('userCurrency');
-  //     setCurrency(currency);
-  //     const rate = JSON.parse(currencyRate);
-  //     console.log(rate, 'rate');
-  //     console.log(currency, 'currency');
-
-  //     if (rate) {
-  //       // Multiply share price and own price by the currency rate
-
-  //       const convertedbalancePrice = rate * (apiData?.balance || 0);
-
-  //       console.log(`Converted balance Price: ${convertedbalancePrice}`);
-
-  //       return {convertedbalancePrice};
-  //     } else {
-  //       console.log('Rate not found in AsyncStorage');
-  //       return {
-  //         convertedbalancePrice: 0,
-  //       };
-  //     }
-  //   } catch (error) {
-  //     console.error('Error retrieving rate from AsyncStorage:', error);
-  //     return {
-  //       convertedbalancePrice: 0,
-  //     };
-  //   }
-  // };
-  // console.log(convertedbalancePrice, 'convertedbalancePrice');
 
   return (
     <View style={styles.container}>
@@ -204,7 +183,9 @@ const Nest_EggLast = ({navigation}) => {
                 style={styles.dateText}>{`Profit: $${apiData.profit}`}</Text> */}
               <Text style={styles.amountText}>
                 {/* {convertedbalancePrice} {currency} */}
-                {apiData?.balance} AED
+                {convertedBalance
+                  ? `${convertedBalance} ${userCurrency}`
+                  : 'Loading...'}
               </Text>
               <Text style={styles.changeText}>
                 {t('up by')} 2% {t('from last month')}

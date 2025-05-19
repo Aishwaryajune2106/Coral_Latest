@@ -109,6 +109,7 @@ import {useTranslation} from 'react-i18next';
 import Futureoption3 from '../Screens/FutureOption/Futureoption3';
 import Futureoption4 from '../Screens/FutureOption/Futureoption4';
 import NomineeList from '../Screens/Contracts/NomineeList';
+import Cwigraph from '../Screens/CWI_Invest/Cwigraph';
 
 const Stack = createNativeStackNavigator();
 
@@ -579,6 +580,11 @@ function AuthStack() {
       <Stack.Screen
         name="CwiAmountScreen"
         component={Cwi_Amount}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="CwiGraphScreen"
+        component={Cwigraph}
         options={{headerShown: false}}
       />
       <Stack.Screen

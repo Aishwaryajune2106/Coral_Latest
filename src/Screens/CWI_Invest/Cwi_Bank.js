@@ -177,6 +177,7 @@ const Cwi_Bank = ({navigation}) => {
       console.log(amountInAED, 'amountInAED');
 
       const nomineeSelected = selectedNomineeOption !== null;
+      setInvestmentAmount(amountInAED);
 
       const requestBody = {
         id: selectedInvestment.fi_id,

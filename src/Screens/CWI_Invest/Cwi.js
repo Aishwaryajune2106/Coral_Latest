@@ -48,7 +48,7 @@ const Cwi = ({navigation}) => {
         'https://coral.lunarsenterprises.com/wealthinvestment/user/top_company',
 
         {
-          method: 'GET',
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             user_id: await AsyncStorage.getItem(AppStrings.USER_ID),
@@ -138,7 +138,12 @@ const Cwi = ({navigation}) => {
   };
   // Render each item
   const renderItem = ({item}) => (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => {
+        setSelectedInvestment(item);
+        navigation.navigate('CwiGraphScreen', {investmentId: item.tc_id});
+      }}>
       <View style={styles.leftSection}>
         <Image source={AppImages.Future} style={styles.roundImage} />
         <View style={styles.textContainer}>
@@ -170,10 +175,13 @@ const Cwi = ({navigation}) => {
         </View>
         <View style={styles.rightSection}>
           <Text style={styles.totalAmount}>
-            Planned to Invest: {item.fi_plan_to_invest}
+            Plan to Invest: {item.fi_plan_to_invest}
           </Text>
           <Text style={styles.investedAmount}>
             Expected return: {item.fi_expected_return}
+          </Text>
+          <Text style={styles.investedAmount}>
+            Mini. Amount: {item.fi_minimum_investment}
           </Text>
           <Text style={styles.investedAmount}>
             {/* Mini. Investment: {item.fi_minimum_investment} */}
@@ -202,7 +210,7 @@ const Cwi = ({navigation}) => {
               source={AppImages.Blackbackicon}
               style={[
                 styles.backIcon,
-                i18n.language === 'ar' ? {transform: [{scaleX: -1}]} : {},
+                i18n?.language === 'ar' ? {transform: [{scaleX: -1}]} : {},
               ]}
             />
           </TouchableOpacity>

@@ -88,7 +88,7 @@ const Investmentstep4 = ({navigation}) => {
 
       // Pick a PDF file
       const res = await DocumentPicker.pick({
-        type: [DocumentPicker.types.pdf], // Allow only PDF files
+        type: [DocumentPicker?.types?.pdf], // Allow only PDF files
       });
 
       if (!res || res.length === 0) {
@@ -185,6 +185,8 @@ const Investmentstep4 = ({navigation}) => {
       // STEP 2: Convert to AED
       const convertedToAED = investmentAmount / conversionRate;
       console.log(convertedToAED, 'convertedToAED');
+      // ✅ Set it in the context (converted to AED)
+      setInvestmentAmount(convertedToAED);
 
       const requestBody = {
         bankAccount: selectedOptions?.b_id,

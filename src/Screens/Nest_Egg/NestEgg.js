@@ -53,17 +53,14 @@ const NestEgg = ({navigation}) => {
     setModalNo2Visible(false);
   };
 
-  const closeModalNo2open = () => {
-    setModalNo2Visible(true);
-  };
-console.log(selectedOption, "selectedOption");
+  console.log(selectedOption, 'selectedOption');
 
   const confirmPlan = () => {
     setModalNo2Visible(false);
     navigation.navigate('NestEggAmountScreen', {
       selectedPlan: selectedPlan,
       w_id: selectedOption?.w_id,
-      balance: apiData?.balance,
+      balance: convertedBalance,
     });
   };
   //.................List Api..................//
@@ -100,90 +97,68 @@ console.log(selectedOption, "selectedOption");
 
   useEffect(() => {
     fetchTransactionData();
-    fetchData();
+    fetchNestEggData();
   }, []);
-  const fetchData = async () => {
+  const [convertedBalance, setConvertedBalance] = useState(null);
+  const [userCurrency, setUserCurrency] = useState('USD'); // Default fallback
+
+  const fetchNestEggData = async () => {
     const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
-    console.log(user_id, 'user');
+    const currency = await AsyncStorage.getItem('userCurrency'); // fetch currency
+    const defaultCurrency = currency || 'USD'; // fallback to 'USD' if null
+    setUserCurrency(defaultCurrency); // update the state
 
     try {
-      const response = await axios.get(
+      setLoading(true);
+
+      const response = await fetch(
         'https://coral.lunarsenterprises.com/wealthinvestment/user/nestegg/list',
         {
+          method: 'GET',
           headers: {
+            'Content-Type': 'application/json',
             user_id: user_id,
           },
         },
       );
-      console.log('API Response:', response?.data);
-      if (response?.data?.result) {
-        setApiData({
-          balance: response?.data?.balance,
-          profit: response?.data?.profit,
-          data: response?.data?.data,
-        });
-        console.log(response?.data?.message);
+
+      const data = await response.json();
+
+      if (data.result) {
+        setApiData(data.data);
+
+        const balance = data?.balance || 0;
+        console.log(balance, 'ballllll');
+
+        // Fetch exchange rate
+        const rateResponse = await fetch(
+          'https://api.exchangerate-api.com/v4/latest/AED',
+        );
+        const rateData = await rateResponse.json();
+
+        const rate = rateData?.rates?.[defaultCurrency];
+
+        if (rate) {
+          const converted = (balance * rate).toFixed(2);
+          setConvertedBalance(converted);
+          console.log(`Converted Balance in ${defaultCurrency}:`, converted);
+        } else {
+          console.warn(`Exchange rate for ${defaultCurrency} not found.`);
+        }
       } else {
-        console.log(response?.data?.message);
+        console.error('Failed to fetch NestEgg data:', data.message);
       }
     } catch (error) {
-      console.error('Error fetching API data:', error);
+      console.error('NestEgg API Error:', error);
+    } finally {
+      setLoading(false);
     }
   };
-  // const [convertedbalancePrice, setConvertedbalancePrice] = useState(0);
-  // const [currency, setCurrency] = useState('');
-  // useEffect(() => {
-  //   const fetchAndCalculatePrices = async () => {
-  //     const {convertedbalancePrice} = await calculateConvertedPrices();
 
-  //     setConvertedbalancePrice(convertedbalancePrice);
-  //   };
-
-  //   fetchAndCalculatePrices();
-  // }, [apiData]);
-  // // Function to calculate the wallet balance based on the stored rate
-  // const calculateConvertedPrices = async () => {
-  //   try {
-  //     const currencyRate = await AsyncStorage.getItem('userCurrencyRate');
-  //     const currency = await AsyncStorage.getItem('userCurrency');
-  //     setCurrency(currency);
-  //     const rate = JSON.parse(currencyRate);
-  //     console.log(rate, 'rate');
-  //     console.log(currency, 'currency');
-
-  //     if (rate) {
-  //       // Multiply share price and own price by the currency rate
-
-  //       const convertedbalancePrice = rate * (apiData?.balance || 0);
-
-  //       console.log(`Converted balance Price: ${convertedbalancePrice}`);
-
-  //       return {convertedbalancePrice};
-  //     } else {
-  //       console.log('Rate not found in AsyncStorage');
-  //       return {
-  //         convertedbalancePrice: 0,
-  //       };
-  //     }
-  //   } catch (error) {
-  //     console.error('Error retrieving rate from AsyncStorage:', error);
-  //     return {
-  //       convertedbalancePrice: 0,
-  //     };
-  //   }
-  // };
-  // console.log(convertedbalancePrice, 'convertedbalancePrice');
+  console.log(convertedBalance, 'convertedBalance');
 
   return (
     <View style={styles.container}>
-      {/* <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}>
-          <Image source={AppImages.Blackbackicon} style={styles.backIcon} />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Nest Egg</Text>
-      </View> */}
       <ScrollView
         contentContainerStyle={{flexGrow: 1, backgroundColor: AppColors.white}}
         showsVerticalScrollIndicator={false}>
@@ -194,13 +169,13 @@ console.log(selectedOption, "selectedOption");
             style={styles.headerBackground}>
             <View style={styles.headerContent}>
               <Text style={styles.balanceText}>{t('Balance')}</Text>
-              {/* <Text style={styles.dateText}>Today, 08 Sept 2019</Text> */}
+
               <Text style={styles.amountText}>
-                {/* {convertedbalancePrice}{" "}{currency} */}
-                {apiData?.balance} AED
+                {convertedBalance
+                  ? `${convertedBalance} ${userCurrency}`
+                  : `${apiData?.balance} AED`}
               </Text>
-              {/* <Text style={styles.changeText}>up by 2% from last month</Text> */}
-              {/* Add Future Plan Section */}
+
               <Text style={styles.futurePlanTitle}>
                 {t('Select Your Future Plan')}
               </Text>

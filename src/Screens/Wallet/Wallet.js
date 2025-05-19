@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Linking,
+  Alert,
 } from 'react-native';
 import AppImages from '../../Constants/AppImages';
 import AppColors from '../../Constants/AppColors';
@@ -29,6 +30,7 @@ const Wallet = ({navigation}) => {
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hasSelected, setHasSelected] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -98,7 +100,61 @@ const Wallet = ({navigation}) => {
   const selectOption = async option => {
     setSelectedOption(option);
     setDropdownVisible(false);
-    await downloadStatement(option); // Ensure option is passed
+
+    // Prevent download if selecting placeholder
+    if (option === 'Select' || option === t('Month')) return;
+
+    let monthAgo;
+    switch (option) {
+      case t('Month'):
+      case 'Month':
+        monthAgo = 1;
+        break;
+      case `3 ${t('Month')}`:
+      case '3 Month':
+        monthAgo = 3;
+        break;
+      case `6 ${t('Month')}`:
+      case '6 Month':
+        monthAgo = 6;
+        break;
+      case `12 ${t('Month')}`:
+      case '12 Month':
+        monthAgo = 12;
+        break;
+      default:
+        return;
+    }
+
+    try {
+      const userId = await AsyncStorage.getItem(AppStrings.USER_ID);
+      const response = await axios.get(
+        'https://coral.lunarsenterprises.com/wealthinvestment/user/download/statement/profit',
+        {
+          params: {monthAgo},
+          headers: {user_id: userId},
+        },
+      );
+
+      if (response.data.result) {
+        const fileUrl = response.data.file;
+        if (fileUrl) {
+          Linking.openURL(fileUrl);
+        } else {
+          Alert.alert('Download Failed', 'No file available for download.');
+        }
+      } else {
+        Alert.alert(
+          'Error',
+          response.data.message || 'Failed to retrieve statement.',
+        );
+      }
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        'Something went wrong while downloading the statement.',
+      );
+    }
   };
 
   //...............contractlist api.................//
@@ -156,6 +212,9 @@ const Wallet = ({navigation}) => {
 
   const [transactions, setTransactions] = useState([]);
   const [walletAmount, setWalletAmount] = useState(0);
+  const [userCurrency, setUserCurrency] = useState('AED');
+  const [convertedAmount, setConvertedAmount] = useState(null);
+
   useEffect(() => {
     const fetchTransactions = async () => {
       const userId = await AsyncStorage.getItem(AppStrings.USER_ID);
@@ -246,6 +305,34 @@ const Wallet = ({navigation}) => {
     }
   };
 
+  useEffect(() => {
+    fetchExchangeRateAndConvert();
+  }, [walletAmount]); // Re-run when walletAmount changes
+
+  const fetchExchangeRateAndConvert = async () => {
+    try {
+      const currency = await AsyncStorage.getItem('userCurrency');
+      if (!currency) return;
+
+      setUserCurrency(currency);
+
+      const response = await fetch(
+        'https://api.exchangerate-api.com/v4/latest/AED',
+      );
+      const data = await response.json();
+
+      const rate = data.rates[currency];
+      if (rate) {
+        const converted = walletAmount * rate;
+        setConvertedAmount(converted.toFixed(2)); // round to 2 decimal places
+      } else {
+        console.warn(`No conversion rate found for ${currency}`);
+      }
+    } catch (error) {
+      console.error('Currency conversion failed:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -260,7 +347,10 @@ const Wallet = ({navigation}) => {
               <Text style={styles.balanceText1}>
                 {t('Today')}, {moment().format('DD MMM YYYY')}
               </Text>
-              <Text style={styles.amountText}>{walletAmount}</Text>
+              <Text style={styles.amountText}>
+                {convertedAmount}
+                {userCurrency}
+              </Text>
 
               {/* <Text style={styles.balanceText1}>
                 Up by 2% profit from last month
@@ -284,13 +374,7 @@ const Wallet = ({navigation}) => {
         {/* Statement Dropdown */}
         <View style={styles.statementWrapper}>
           <TouchableOpacity
-            onPress={() => {
-              if (selectedOption === 'Select') {
-                setDropdownVisible(!isDropdownVisible);
-              } else {
-                downloadStatement(selectedOption); // Ensure selectedOption is passed
-              }
-            }}
+            onPress={toggleDropdown}
             style={styles.statementButton}>
             <Image source={AppImages.Download} style={styles.downloadIcon} />
             <Text style={styles.statementText}>

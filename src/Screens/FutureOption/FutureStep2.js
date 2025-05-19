@@ -146,7 +146,7 @@ const FutureStep2 = ({route, navigation}) => {
         {/* Chart Section */}
         <View style={styles.chartContainer}>
           <Text style={styles.chartTitle}>
-            {t('Investment End by')} {formattedDuration}
+            {t('Investment End by')} {duration} years
           </Text>
           <Text style={styles.chartPercentage}>{percentageReturn}</Text>
 
@@ -185,7 +185,7 @@ const FutureStep2 = ({route, navigation}) => {
           <Image source={AppImages.Profit} style={styles.profitIcon} />
           <Text style={styles.profitText}>{t('Estimated Profit Growth')}</Text>
           <Text style={styles.profitValue}>
-            {returnAmount}({percentageReturn})
+            {returnAmount}(AED)({percentageReturn})
           </Text>
           <View style={styles.detailsList}>
             <Text style={styles.detailItem}>
@@ -194,7 +194,7 @@ const FutureStep2 = ({route, navigation}) => {
             </Text>
             <Text style={styles.detailItem}>
               <Text style={styles.colorBlockBlue}>⬤</Text> {t('End Date')} :{' '}
-              {formattedDuration}
+              {duration} years
             </Text>
             <Text style={styles.detailItem}>
               <Text style={styles.colorBlockOrange}>⬤</Text>{' '}

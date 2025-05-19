@@ -19,9 +19,8 @@ import {useTranslation} from 'react-i18next';
 const InvestmentReturns = ({route, navigation}) => {
   const {t, i18n} = useTranslation();
   const {chartData, returnAmount, percentageReturn} = route.params;
-  console.log(returnAmount, percentageReturn);
+  console.log(returnAmount, percentageReturn, 'hi this my data');
   console.log('Chart Data1111111:', chartData);
-  
 
   console.log('Chart Data:', chartData);
   const {

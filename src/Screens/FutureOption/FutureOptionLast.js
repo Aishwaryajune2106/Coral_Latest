@@ -65,8 +65,37 @@ const FutureOptionLast = ({navigation}) => {
       setLoading(false);
     }
   };
+
   const [convertedbalancePrice, setConvertedbalancePrice] = useState(0);
   const [currency, setCurrency] = useState('');
+  useEffect(() => {
+    if (totalInvestment !== 0) {
+      convertInvestmentToUserCurrency();
+    }
+  }, [totalInvestment]);
+
+  const convertInvestmentToUserCurrency = async () => {
+    try {
+      const userCurrency = await AsyncStorage.getItem('userCurrency');
+      setCurrency(userCurrency);
+
+      const response = await fetch(
+        'https://api.exchangerate-api.com/v4/latest/AED',
+      );
+      const data = await response.json();
+
+      if (data && data.rates && data.rates[userCurrency]) {
+        const rate = data.rates[userCurrency];
+        const converted = totalInvestment * rate;
+        setConvertedbalancePrice(converted.toFixed(2)); // Limit to 2 decimal places
+      } else {
+        console.warn('Currency rate not found for:', userCurrency);
+      }
+    } catch (error) {
+      console.error('Error converting currency:', error);
+    }
+  };
+  console.log(totalInvestment, 'totalInvestmentttt');
 
   const renderItem = ({item}) => (
     <TouchableOpacity
@@ -88,6 +117,7 @@ const FutureOptionLast = ({navigation}) => {
         <Image source={AppImages.Polygon} style={styles.icon} />
         <View style={styles.transactionDetails}>
           <Text style={styles.transactionName}>{item.lp_project}</Text>
+
           <Text
             style={[
               styles.transactionType,
@@ -98,6 +128,7 @@ const FutureOptionLast = ({navigation}) => {
         </View>
         <View style={styles.transactionInfo}>
           <Text style={styles.amountPositive}>{item.lp_amount}</Text>
+          <Text style={styles.amountPositive}>ROI :{item.lp_percent}%</Text>
           <Text style={styles.transactionDate}>
             {new Date(item.lp_date).toDateString()}
           </Text>
@@ -108,15 +139,6 @@ const FutureOptionLast = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      {/* <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}>
-          <Image source={AppImages.Blackbackicon} style={styles.backIcon} />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Future Option</Text>
-      </View> */}
-
       {loading ? (
         <ActivityIndicator
           size="large"
@@ -136,13 +158,12 @@ const FutureOptionLast = ({navigation}) => {
               <View
                 style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                 <View style={styles.headerContent}>
-                  <Text style={styles.balanceText}>{t('Balance')}</Text>
+                  <Text style={styles.balanceText}>
+                    Planned Investment Amount
+                  </Text>
                   {/* <Text style={styles.dateText}>Profit: $0.00</Text> */}
                   <Text style={styles.amountText}>
-                    {totalInvestment
-                      ? `${totalInvestment.toFixed(2)}`
-                      : `${totalInvestment}`}{' '}
-                    AED
+                    {convertedbalancePrice} {currency}
                   </Text>
                   {/* <Text style={styles.changeText}>
                     up by 2% from last month
@@ -165,7 +186,8 @@ const FutureOptionLast = ({navigation}) => {
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
                       <Text style={styles.plusIcon}>+</Text>
                       <Text style={styles.withdrawButtonTexts}>
-                        {t('Start to New Invest')}
+                        {/* {t('Start to New Invest')} */}
+                        Lock Now
                       </Text>
                     </View>
                   </TouchableOpacity>

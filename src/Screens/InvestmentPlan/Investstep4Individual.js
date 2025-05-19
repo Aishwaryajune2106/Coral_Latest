@@ -167,6 +167,7 @@ const Investstep4Individual = ({navigation}) => {
 
       // STEP 2: Convert to AED
       const convertedToAED = investmentAmount / conversionRate;
+      setInvestmentAmount(convertedToAED);
 
       const requestBody = {
         bankAccount: selectedOptions.b_id,

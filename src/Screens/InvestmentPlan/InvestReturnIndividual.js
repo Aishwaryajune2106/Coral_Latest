@@ -124,20 +124,20 @@ const InvestReturnIndividual = ({route, navigation}) => {
           </Text>
           <View style={styles.detailsList}>
             <Text style={styles.detailItem}>
-              <Text style={styles.colorBlockGreen}>⬤</Text> {t('Investment Amount')} :
-              {investmentAmount}
+              <Text style={styles.colorBlockGreen}>⬤</Text>{' '}
+              {t('Investment Amount')} :{investmentAmount}
             </Text>
             <Text style={styles.detailItem}>
               <Text style={styles.colorBlockBlue}>⬤</Text> {t('End Date')} :{' '}
               {duration} years
             </Text>
             <Text style={styles.detailItem}>
-              <Text style={styles.colorBlockOrange}>⬤</Text> {t('Investment Mode')} :
-              Any
+              <Text style={styles.colorBlockOrange}>⬤</Text>{' '}
+              {t('Investment Mode')} : Any
             </Text>
             <Text style={styles.detailItem}>
-              <Text style={styles.colorBlockPurple}>⬤</Text>  {t('Profit Modal')} :{' '}
-              {profitModal}({withdrawalFrequency})
+              <Text style={styles.colorBlockPurple}>⬤</Text> {t('Profit Modal')}{' '}
+              : {profitModal}({withdrawalFrequency})
             </Text>
           </View>
         </View>

@@ -124,9 +124,8 @@ const InvestPlanIndividual = ({navigation}) => {
       );
       const data = await response.json();
 
-      const selectedCurrency = userCurrency; // Fallback to AED
+      const selectedCurrency = userCurrency;
       const rate = data?.rates[selectedCurrency];
-      console.log('Selected Currency:', userCurrency);
 
       if (!rate) {
         setCustomAlert({
@@ -134,23 +133,21 @@ const InvestPlanIndividual = ({navigation}) => {
           title: 'Error',
           message: `Currency ${selectedCurrency} not supported.`,
         });
-
         setIsLoading(false);
-        return false;
+        return null;
       }
 
-      // Convert input amount to AED
       const amountInAED = parseFloat(investmentAmount) / rate;
-      console.log('Amount in AED:', amountInAED);
+      console.log('Converted AED Amount:', amountInAED);
 
-      if (isNaN(amountInAED) || amountInAED < 100000) {
+      if (isNaN(amountInAED) || amountInAED < 52000) {
         setCustomAlert({
           visible: true,
           title: 'Error',
-          message: 'Investment Amount must be at least 1000000 AED.',
+          message: 'Investment Amount must be at least 52000 AED.',
         });
         setIsLoading(false);
-        return false;
+        return null;
       }
 
       if (!duration || isNaN(duration) || parseInt(duration) < 1) {
@@ -160,7 +157,7 @@ const InvestPlanIndividual = ({navigation}) => {
           message: 'Duration must be at least 1 year.',
         });
         setIsLoading(false);
-        return false;
+        return null;
       }
 
       if (!profitModal) {
@@ -170,11 +167,11 @@ const InvestPlanIndividual = ({navigation}) => {
           message: 'Please select a profit modal.',
         });
         setIsLoading(false);
-        return false;
+        return null;
       }
 
       setIsLoading(false);
-      return true;
+      return amountInAED.toFixed(2); // Return the converted AED value
     } catch (error) {
       setCustomAlert({
         visible: true,
@@ -182,33 +179,10 @@ const InvestPlanIndividual = ({navigation}) => {
         message: 'Failed to fetch exchange rate.',
       });
       setIsLoading(false);
-      return false;
+      return null;
     }
   };
 
-  const handleNext = async () => {
-    if (validateFields()) {
-      setIsLoading(true);
-      try {
-        await fetchInvestmentData();
-
-        setIsLoading(false);
-        navigation.navigate('InvestReturnIndividualScreen', {
-          chartData,
-          returnAmount,
-          percentageReturn,
-        });
-      } catch (error) {
-        setIsLoading(false);
-        console.error('Error in handling next step:', error);
-        setCustomAlert({
-          visible: true,
-          title: 'Error',
-          message: 'An error occurred. Please try again.',
-        });
-      }
-    }
-  };
   useEffect(() => {
     handleReset();
   }, []);
@@ -223,90 +197,71 @@ const InvestPlanIndividual = ({navigation}) => {
     platform: 'mobile',
   };
 
-  const fetchInvestmentData = async () => {
+  const fetchInvestmentData = async convertedAEDAmount => {
     // setLoading(true);
 
     try {
       const response = await axios.post(
         'https://coral.lunarsenterprises.com/wealthinvestment/user/calculator',
-        datagraph,
+        {...datagraph, amount: convertedAEDAmount ?? investmentAmount},
       );
+      console.log('datagraphinside api', datagraph);
+      const {result, return_amount, percentage} = response.data;
 
-      console.log('datagraph', datagraph);
-      const {result, return_amount, percentage, message} = response.data;
-
-      console.log('Response data:', response.data);
-
-      // Check if the result is false
-      if (!result) {
-        // Show a custom alert with the provided message
-        alert(message || 'An error occurred. Please try again.');
-        return; // Prevent further execution
+      console.log('Response', response.data);
+      // Validate if the response is correct
+      // Check for missing data or false result
+      if (!result || !return_amount || !percentage) {
+        setCustomAlert({
+          visible: true,
+          title: 'No Data Found',
+          message: 'No data found for the provided inputs.',
+        });
+        return {}; // return an empty object to prevent further processing
       }
-
-      // Validate if the response contains a valid return amount
-      if (return_amount) {
+      if (result && return_amount) {
         const parsedReturnAmount = parseFloat(return_amount);
-
         if (!isNaN(parsedReturnAmount)) {
           setReturnAmount(return_amount);
           setPercentageReturn(percentage);
 
           const years = ['2024', '2025', '2026', '2027', '2028', '2029'];
 
-          // Calculate growth
-          const growth = Array.from(
-            {length: years?.length},
-            (_, index) => parsedReturnAmount * ((index + 1) * 0.05),
-          );
+          // Ensure 'growth' is an array
+          const growth = Array?.isArray(growth)
+            ? growth
+            : Array?.from(
+                {length: years?.length},
+                (_, index) => parsedReturnAmount * ((index + 1) * 0.05),
+              );
           const truncatedNumbers = growth?.map(Math.trunc);
 
-          if (truncatedNumbers && truncatedNumbers?.length > 0) {
-            // Update chart data if there's valid growth
-            console.log('Growth Array:', truncatedNumbers);
-            setChartData({
-              labels: years,
-              datasets: [
-                {
-                  data: truncatedNumbers,
-                  color: (opacity = 1) => `rgba(0, 128, 0, ${opacity})`,
-                  strokeWidth: 2,
-                },
-              ],
-            });
+          console.log('Growth Array:', truncatedNumbers);
+          const chart = {
+            labels: years,
+            datasets: [
+              {
+                data: truncatedNumbers,
+                color: (opacity = 1) => `rgba(0, 128, 0, ${opacity})`,
+                strokeWidth: 2,
+              },
+            ],
+          };
+          setChartData(chart);
 
-            const profit = parsedReturnAmount - parseFloat(investmentAmount);
-            setProfitGrowth(`$${profit.toFixed(2)} (${percentage})`);
-          } else {
-            // If no growth data, show an alert and set a default chart
-            alert('No data in chart');
-            setChartData({
-              labels: years,
-              datasets: [
-                {
-                  data: [0, 0, 0, 0, 0, 0], // Default data
-                  color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`, // Red color for default data
-                  strokeWidth: 2,
-                },
-              ],
-            });
-          }
+          const profit = parsedReturnAmount - parseFloat(investmentAmount);
+          setProfitGrowth(`$${profit.toFixed(2)} (${percentage})`);
+          return {
+            return_amount,
+
+            chart,
+            percentage,
+          };
         } else {
-          // alert('Invalid return amount');
+          alert('Invalid return amount');
         }
       } else {
-        // Show an alert if no return amount is provided
-        alert('No return amount available');
-        setChartData({
-          labels: ['2024', '2025', '2026', '2027', '2028', '2029'], // Default years
-          datasets: [
-            {
-              data: [0, 0, 0, 0, 0, 0], // Default dataset
-              color: (opacity = 1) => `rgba(255, 0, 0, ${opacity})`, // Red color for clarity
-              strokeWidth: 2,
-            },
-          ],
-        });
+        // alert('Unable to fetch data');
       }
     } catch (error) {
       console.error('Error fetching investment data: ', error);
@@ -316,6 +271,42 @@ const InvestPlanIndividual = ({navigation}) => {
     }
   };
 
+  const handleNext = async () => {
+    const convertedAED = await validateFields();
+    if (convertedAED) {
+      setIsLoading(true);
+      try {
+        // Fetch the investment data before navigating
+        console.log('Fetching before investment data...');
+        const {return_amount, chart, percentage} = await fetchInvestmentData(
+          convertedAED,
+        );
+        console.log('Investment data fetched:');
+
+        // After the data is fetched and state is updated, navigate to the next screen
+        setIsLoading(false);
+        console.log(
+          {
+            chartData: chartData,
+            chart,
+            returnAmount: return_amount,
+            percentageReturn: percentage,
+          },
+          'chartData12344444',
+        );
+
+        navigation.navigate('InvestReturnIndividualScreen', {
+          chartData: chart,
+          returnAmount: return_amount,
+          percentageReturn: percentage,
+        });
+      } catch (error) {
+        setIsLoading(false); // In case of error, stop the loading
+        console.error('Error in handling next step:', error);
+        alert('An error occurred. Please try again.');
+      }
+    }
+  };
   const handleReset = () => {
     setInvestmentAmount('');
     setDuration(null);
@@ -347,7 +338,6 @@ const InvestPlanIndividual = ({navigation}) => {
       <View style={styles.whiteContainer}>
         <View style={{flex: 1}}>
           <View style={styles.greyContainer}>
-            <Text style={styles.label1}>{t('Investment Amount')}(AED)</Text>
             <TouchableOpacity style={styles.optionButton}>
               <Text style={styles.optionText}>{selectedOptiony}</Text>
             </TouchableOpacity>
@@ -369,7 +359,7 @@ const InvestPlanIndividual = ({navigation}) => {
           />
           {parseFloat(investmentAmount) > 0 &&
             exchangeRate &&
-            parseFloat(investmentAmount) / exchangeRate < 100000 && (
+            parseFloat(investmentAmount) / exchangeRate < 52000 && (
               <Text style={styles.errorText}>
                 {t(
                   'Amount should be at least 52,000 AED in your selected currency',

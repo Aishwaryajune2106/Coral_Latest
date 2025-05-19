@@ -90,6 +90,7 @@ const Withdraw = ({navigation}) => {
         setInvestHistory(data.investhistory);
         setTotalAmount(data.total_amount);
         setDownloadLink(data.file);
+        convertToUserCurrency(data.total_amount);
       }
     } catch (error) {
       console.error('Error fetching withdrawal history:', error);
@@ -126,61 +127,39 @@ const Withdraw = ({navigation}) => {
     </View>
   );
 
-  // const [convertedbalancePrice, setConvertedbalancePrice] = useState(0);
-  // const [currency, setCurrency] = useState('');
-  // useEffect(() => {
-  //   const fetchAndCalculatePrices = async () => {
-  //     const {convertedbalancePrice} = await calculateConvertedPrices();
+  const [convertedAmount, setConvertedAmount] = useState(null);
+  const [userCurrency, setUserCurrency] = useState('');
 
-  //     setConvertedbalancePrice(convertedbalancePrice);
-  //   };
+  // Fetch exchange rate and convert amount
+  const convertToUserCurrency = async amountInAed => {
+    const sourceCurrency = await AsyncStorage.getItem('userCurrency');
+    setUserCurrency(sourceCurrency || 'AED');
 
-  //   fetchAndCalculatePrices();
-  // }, [totalAmount]);
-  // // Function to calculate the wallet balance based on the stored rate
-  // const calculateConvertedPrices = async () => {
-  //   try {
-  //     const currencyRate = await AsyncStorage.getItem('userCurrencyRate');
-  //     const currency = await AsyncStorage.getItem('userCurrency');
-  //     setCurrency(currency);
-  //     const rate = JSON.parse(currencyRate);
-  //     console.log(rate, 'rate');
-  //     console.log(currency, 'currency');
+    if (!sourceCurrency || sourceCurrency === 'AED') {
+      setConvertedAmount(amountInAed);
+      return;
+    }
 
-  //     if (rate) {
-  //       // Multiply share price and own price by the currency rate
+    try {
+      const response = await fetch(
+        'https://api.exchangerate-api.com/v4/latest/AED',
+      );
+      const data = await response.json();
+      const rate = data.rates[sourceCurrency];
 
-  //       const convertedbalancePrice = rate * (totalAmount || 0);
-
-  //       console.log(`Converted balance Price: ${convertedbalancePrice}`);
-
-  //       return {convertedbalancePrice};
-  //     } else {
-  //       console.log('Rate not found in AsyncStorage');
-  //       return {
-  //         convertedbalancePrice: 0,
-  //       };
-  //     }
-  //   } catch (error) {
-  //     console.error('Error retrieving rate from AsyncStorage:', error);
-  //     return {
-  //       convertedbalancePrice: 0,
-  //     };
-  //   }
-  // };
-  // console.log(convertedbalancePrice, 'convertedbalancePrice');
+      if (rate) {
+        const converted = amountInAed * rate;
+        setConvertedAmount(converted.toFixed(2)); // Round to 2 decimals
+      } else {
+        console.warn(`Rate for ${sourceCurrency} not found.`);
+      }
+    } catch (error) {
+      console.error('Error fetching exchange rates:', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      {/* <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}>
-          <Image source={AppImages.Blackbackicon} style={styles.backIcon} />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Cash Out</Text>
-      </View> */}
-
       <ScrollView
         contentContainerStyle={{flexGrow: 1}}
         showsVerticalScrollIndicator={false}>
@@ -190,10 +169,12 @@ const Withdraw = ({navigation}) => {
             style={styles.headerBackground}>
             <View style={styles.headerContent}>
               <Text style={styles.balanceText}>Total Balance</Text>
-              <Text style={styles.amountText}>
-                {/* {convertedbalancePrice} {currency} */}
-                {totalAmount} AED
-              </Text>
+              {convertedAmount && userCurrency !== 'AED' && (
+                <Text style={styles.amountText}>
+                  {/* {convertedbalancePrice} {currency} */}
+                  {convertedAmount} {userCurrency}
+                </Text>
+              )}
             </View>
           </ImageBackground>
         </View>

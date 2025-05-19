@@ -45,23 +45,23 @@ const Kycthree = ({navigation}) => {
     };
 
     const imageHandler = response => {
+      console.log('Camera Response:', response); // 👈 Add this
+
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.errorCode) {
         console.error('Image Picker Error:', response.errorMessage);
-      } else {
+      } else if (response.assets && response.assets.length > 0) {
         const asset = response.assets[0];
-
-        // Create image object with uri, type, name, and size
         const image = {
           uri: asset.uri,
           type: asset.type,
-          name: asset.fileName,
+          name: asset.fileName ?? `photo_${Date.now()}.jpg`, // fallback name
           size: asset.fileSize,
         };
-
-        // Set the backImage with the image details
         setBackImage(image);
+      } else {
+        console.warn('Unexpected image response:', response);
       }
     };
 

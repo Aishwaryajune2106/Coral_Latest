@@ -29,6 +29,7 @@ const Profit = () => {
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userCurrency, setUserCurrency] = useState('');
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -69,21 +70,31 @@ const Profit = () => {
   //...............download profit statement api.................//
 
   const selectOption = async option => {
+    // If the same option is selected again, don't do anything
+    if (option === selectedOption) {
+      setDropdownVisible(false);
+      return;
+    }
+
     setSelectedOption(option);
     setDropdownVisible(false);
 
     // Convert selected option to monthAgo value
     let monthAgo;
     switch (option) {
+      case t('Month'):
       case 'Month':
-        monthAgo = 1; // Added case for "Month"
+        monthAgo = 1;
         break;
+      case `3 ${t('Month')}`:
       case '3 Month':
         monthAgo = 3;
         break;
+      case `6 ${t('Month')}`:
       case '6 Month':
         monthAgo = 6;
         break;
+      case `12 ${t('Month')}`:
       case '12 Month':
         monthAgo = 12;
         break;
@@ -155,6 +166,39 @@ const Profit = () => {
 
   const [transactions, setTransactions] = useState([]);
   const [walletAmount, setWalletAmount] = useState(0);
+  const [convertedAmount, setConvertedAmount] = useState(null);
+  useEffect(() => {
+    const convertCurrency = async () => {
+      try {
+        const storedCurrency = await AsyncStorage.getItem('userCurrency');
+        if (!storedCurrency) {
+          console.warn('No user currency found');
+          return;
+        }
+
+        setUserCurrency(storedCurrency); // <-- Set currency in state
+
+        const {data} = await axios.get(
+          'https://api.exchangerate-api.com/v4/latest/AED',
+        );
+        const conversionRate = data.rates[storedCurrency];
+
+        if (!conversionRate) {
+          console.warn(
+            `No conversion rate found for currency: ${storedCurrency}`,
+          );
+          return;
+        }
+
+        const converted = walletAmount * conversionRate;
+        setConvertedAmount(converted.toFixed(2));
+      } catch (error) {
+        console.error('Currency conversion error:', error);
+      }
+    };
+
+    convertCurrency();
+  }, [walletAmount]);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -173,7 +217,6 @@ const Profit = () => {
         if (response.data.result) {
           setTransactions(response.data.data);
           setWalletAmount(response.data.wallet);
-          
 
           console.log('Updated Transactions State:', response.data.data); // Debugging: Check state update
         } else {
@@ -193,65 +236,6 @@ const Profit = () => {
     console.log('Transactions updated:', transactions); // Debugging: Check if state updates after API call
   }, [transactions]);
 
-  // const [convertedbalancePrice, setConvertedbalancePrice] = useState(0);
-  // const [convertedamountPrice, setConvertedamountPrice] = useState(0);
-  // const [currency, setCurrency] = useState('');
-  // useEffect(() => {
-  //   const fetchAndCalculatePrices = async () => {
-  //     const {convertedbalancePrice, convertedamountPrice} =
-  //       await calculateConvertedPrices();
-  //     setConvertedbalancePrice(convertedbalancePrice);
-  //     setConvertedamountPrice(convertedamountPrice);
-  //   };
-
-  //   if (transactions.length > 0 || contracts.length > 0) {
-  //     fetchAndCalculatePrices();
-  //   }
-  // }, [transactions, contracts]); // Runs when transactions change
-
-  // // Function to calculate the wallet balance based on the stored rate
-  // const calculateConvertedPrices = async () => {
-  //   try {
-  //     const currencyRate = await AsyncStorage.getItem('userCurrencyRate');
-  //     const currency = await AsyncStorage.getItem('userCurrency');
-  //     setCurrency(currency);
-  //     const rate = JSON.parse(currencyRate);
-
-  //     console.log(rate, 'rate');
-  //     console.log(currency, 'currency');
-
-  //     if (rate) {
-  //       // Sum up all `w_amount` from transactions
-  //       const totalBalance = transactions.reduce(
-  //         (sum, txn) => sum + parseFloat(txn.w_amount || 0),
-  //         0,
-  //       );
-
-  //       // Sum up all `ui_amount` from contracts
-  //       const totalUiAmount = contracts.reduce(
-  //         (sum, contract) => sum + parseFloat(contract.ui_amount || 0),
-  //         0,
-  //       );
-
-  //       const convertedbalancePrice = rate * totalBalance;
-  //       const convertedamountPrice = rate * totalUiAmount;
-
-  //       console.log(`Converted Balance Price: ${convertedbalancePrice}`);
-  //       console.log(`Converted UI Amount Price: ${convertedamountPrice}`);
-
-  //       return {convertedbalancePrice, convertedamountPrice};
-  //     } else {
-  //       console.log('Rate not found or no data available');
-  //       return {convertedbalancePrice: 0, convertedamountPrice: 0};
-  //     }
-  //   } catch (error) {
-  //     console.error('Error retrieving rate from AsyncStorage:', error);
-  //     return {convertedbalancePrice: 0, convertedamountPrice: 0};
-  //   }
-  // };
-
-  // console.log(convertedbalancePrice, 'convertedbalancePrice');
-  // console.log(convertedamountPrice, 'convertedamountPrice');
   return (
     <View style={styles.container}>
       <ScrollView
@@ -263,7 +247,9 @@ const Profit = () => {
             style={styles.headerBackground}>
             <View style={styles.headerContent}>
               <Text style={styles.balanceText}>{t('Profit')}</Text>
-              <Text style={styles.amountText}>{walletAmount}</Text>
+              <Text style={styles.amountText}>
+                {convertedAmount} {userCurrency}
+              </Text>
               <Text style={styles.balanceText1}>
                 {t('Today')}, {moment().format('DD MMM YYYY')}
               </Text>

@@ -260,7 +260,7 @@ const Login = ({navigation}) => {
             {/* Social Login Options */}
             <Text style={styles.orText}>{t('Or sign up with')}</Text>
             <View style={styles.socialButtonsContainer}>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={styles.socialButton}
                 // onPress={onGoogleButtonPress}
                 >
@@ -268,14 +268,14 @@ const Login = ({navigation}) => {
                 <Text style={styles.socialButtonText}>
                   {t('Sign in with Google')}
                 </Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
-              <TouchableOpacity style={styles.socialButton}>
+              {/* <TouchableOpacity style={styles.socialButton}>
                 <Image source={AppImages.Apple} style={styles.socialImage} />
                 <Text style={styles.socialButtonText}>
                   {t('Sign in with Apple ID')}
                 </Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
 
             {/* Sign-Up Link */}

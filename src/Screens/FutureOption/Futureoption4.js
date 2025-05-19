@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import AppImages from '../../Constants/AppImages';
 import AppColors from '../../Constants/AppColors';
 import {Dropdown} from 'react-native-element-dropdown';
@@ -95,6 +95,13 @@ const Futureoption4 = ({navigation, route}) => {
     lp_profit_model,
     'getttt this is params',
   );
+
+  useEffect(() => {
+  if (lp_amount) {
+    setInvestmentAmount(lp_amount);
+  }
+}, [lp_amount]);
+
 
   // Function to handle file upload
   const handleUpload = async () => {
@@ -182,6 +189,7 @@ const Futureoption4 = ({navigation, route}) => {
   console.log(personalDetails, 'personalDetailsSSS');
 
   //..............INVEST API.....................//
+  console.log(lp_amount, 'this is amount');
 
   const [contract_id, setContract_id] = useState('');
   const handleDownload = async () => {
@@ -202,7 +210,7 @@ const Futureoption4 = ({navigation, route}) => {
       },
       investment: {
         industry: lp_project,
-        investment_amount: lp_amount,
+        investment_amount: investmentAmount,
         investment_duration: lp_duration,
         percentage: lp_percent,
         profit_model: lp_profit_model,

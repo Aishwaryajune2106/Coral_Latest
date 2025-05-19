@@ -63,7 +63,7 @@ const Yourphoto = ({navigation}) => {
     ]);
   };
 
-  const pickImage = type => {
+  const pickImage = async type => {
     const options = {mediaType: 'photo', quality: 1};
 
     const imageHandler = response => {
@@ -72,9 +72,16 @@ const Yourphoto = ({navigation}) => {
       } else if (response.errorCode) {
         console.error('Image Picker Error:', response.errorMessage);
       } else {
-        const {uri, type, fileName, fileSize} = response.assets[0];
-        const imageData = {uri, type, name: fileName, size: fileSize};
-        setUploadedImage(imageData);
+        const asset = response.assets?.[0];
+        if (asset) {
+          const uri = asset.uri;
+          const name =
+            asset.fileName ||
+            `photo_${Date.now()}.${asset.type?.split('/')[1] || 'jpg'}`;
+          const type = asset.type || 'image/jpeg';
+          const imageData = {uri, name, type};
+          setUploadedImage(imageData);
+        }
       }
     };
 
@@ -199,6 +206,7 @@ const Yourphoto = ({navigation}) => {
           body: formData,
         },
       );
+      console.log(formData, 'formdata for kyc');
 
       const data = await response.json();
       console.log('hii7');

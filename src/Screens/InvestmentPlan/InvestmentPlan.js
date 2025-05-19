@@ -44,7 +44,6 @@ const InvestmentPlan = ({navigation}) => {
     selectedOptiony,
     setSelectedOptiony,
   } = useContext(CountryContext);
-  
 
   const [userCurrency, setUserCurrency] = useState('AED'); // Default AED
 
@@ -136,9 +135,8 @@ const InvestmentPlan = ({navigation}) => {
       );
       const data = await response.json();
 
-      const selectedCurrency = userCurrency; // Fallback to AED
-      const rate = data.rates[selectedCurrency];
-      console.log('Selected Currency:', userCurrency);
+      const selectedCurrency = userCurrency;
+      const rate = data?.rates[selectedCurrency];
 
       if (!rate) {
         setCustomAlert({
@@ -146,14 +144,12 @@ const InvestmentPlan = ({navigation}) => {
           title: 'Error',
           message: `Currency ${selectedCurrency} not supported.`,
         });
-
         setIsLoading(false);
-        return false;
+        return null;
       }
 
-      // Convert input amount to AED
       const amountInAED = parseFloat(investmentAmount) / rate;
-      console.log('Amount in AED:', amountInAED);
+      console.log('Converted AED Amount:', amountInAED);
 
       if (isNaN(amountInAED) || amountInAED < 52000) {
         setCustomAlert({
@@ -162,7 +158,7 @@ const InvestmentPlan = ({navigation}) => {
           message: 'Investment Amount must be at least 52000 AED.',
         });
         setIsLoading(false);
-        return false;
+        return null;
       }
 
       if (!duration || isNaN(duration) || parseInt(duration) < 1) {
@@ -172,7 +168,7 @@ const InvestmentPlan = ({navigation}) => {
           message: 'Duration must be at least 1 year.',
         });
         setIsLoading(false);
-        return false;
+        return null;
       }
 
       if (!profitModal) {
@@ -182,11 +178,11 @@ const InvestmentPlan = ({navigation}) => {
           message: 'Please select a profit modal.',
         });
         setIsLoading(false);
-        return false;
+        return null;
       }
 
       setIsLoading(false);
-      return true;
+      return amountInAED.toFixed(2); // Return the converted AED value
     } catch (error) {
       setCustomAlert({
         visible: true,
@@ -194,48 +190,7 @@ const InvestmentPlan = ({navigation}) => {
         message: 'Failed to fetch exchange rate.',
       });
       setIsLoading(false);
-      return false;
-    }
-  };
-
-  const validateEndDate = selectedDate => {
-    const today = new Date();
-    const oneYearFromNow = new Date(today.setFullYear(today.getFullYear() + 1));
-
-    if (selectedDate >= oneYearFromNow) {
-      setDateError('');
-      return true;
-    } else {
-      setDateError(
-        'End date should be more than or equal to 1 year from today',
-      );
-      return false;
-    }
-  };
-
-  //............handleNext...............//
-
-  const handleNext = async () => {
-    if (validateFields()) {
-      setIsLoading(true);
-      try {
-        // Fetch the investment data before navigating
-        await fetchInvestmentData();
-
-        // After the data is fetched and state is updated, navigate to the next screen
-        setIsLoading(false);
-        console.log(chartData, 'chartData12344444');
-
-        navigation.navigate('InvestReturnScreen', {
-          chartData: chartData,
-          returnAmount: returnAmount,
-          percentageReturn: percentageReturn,
-        });
-      } catch (error) {
-        setIsLoading(false); // In case of error, stop the loading
-        console.error('Error in handling next step:', error);
-        alert('An error occurred. Please try again.');
-      }
+      return null;
     }
   };
 
@@ -245,7 +200,7 @@ const InvestmentPlan = ({navigation}) => {
     amount: investmentAmount,
     duration: duration,
     wf: withdrawalFrequency,
-    project: 'any',
+    project: 'Any',
     platform: 'mobile',
   };
 
@@ -257,20 +212,29 @@ const InvestmentPlan = ({navigation}) => {
     handleReset();
   }, []);
 
-  const fetchInvestmentData = async () => {
+  const fetchInvestmentData = async convertedAEDAmount => {
     // setLoading(true);
 
     try {
       const response = await axios.post(
         'https://coral.lunarsenterprises.com/wealthinvestment/user/calculator',
-        datagraph,
+        {...datagraph, amount: convertedAEDAmount ?? investmentAmount},
       );
       console.log('datagraphinside api', datagraph);
       const {result, return_amount, percentage} = response.data;
 
       console.log('Response', response.data);
-
       // Validate if the response is correct
+
+      // Check for missing data or false result
+      if (!result || !return_amount || !percentage) {
+        setCustomAlert({
+          visible: true,
+          title: 'No Data Found',
+          message: 'No data found for the provided inputs.',
+        });
+        return {}; // return an empty object to prevent further processing
+      }
       if (result && return_amount) {
         const parsedReturnAmount = parseFloat(return_amount);
         if (!isNaN(parsedReturnAmount)) {
@@ -289,7 +253,7 @@ const InvestmentPlan = ({navigation}) => {
           const truncatedNumbers = growth?.map(Math.trunc);
 
           console.log('Growth Array:', truncatedNumbers);
-          setChartData({
+          const chart={
             labels: years,
             datasets: [
               {
@@ -298,10 +262,16 @@ const InvestmentPlan = ({navigation}) => {
                 strokeWidth: 2,
               },
             ],
-          });
+          }
+          setChartData(chart);
 
           const profit = parsedReturnAmount - parseFloat(investmentAmount);
           setProfitGrowth(`$${profit.toFixed(2)} (${percentage})`);
+          return {
+            return_amount,
+            chart,
+            percentage,
+          };
         } else {
           alert('Invalid return amount');
         }
@@ -313,6 +283,45 @@ const InvestmentPlan = ({navigation}) => {
       alert('Error fetching investment data');
     } finally {
       // setLoading(false);
+    }
+  };
+  console.log(duration, 'durationss');
+
+  //............handleNext...............//
+
+  const handleNext = async () => {
+    const convertedAED = await validateFields();
+    if (convertedAED) {
+      setIsLoading(true);
+      try {
+        // Fetch the investment data before navigating
+        console.log('Fetching before investment data...');
+        const {return_amount, chart, percentage} =
+          await fetchInvestmentData(convertedAED);
+        console.log('Investment data fetched:');
+
+        // After the data is fetched and state is updated, navigate to the next screen
+        setIsLoading(false);
+        console.log(
+          {
+            chartData: chartData,
+            chart,
+            returnAmount: return_amount,
+            percentageReturn: percentage,
+          },
+          'chartData12344444',
+        );
+
+        navigation.navigate('InvestReturnScreen', {
+          chartData: chart,
+          returnAmount: return_amount,
+          percentageReturn: percentage,
+        });
+      } catch (error) {
+        setIsLoading(false); // In case of error, stop the loading
+        console.error('Error in handling next step:', error);
+        alert('An error occurred. Please try again.');
+      }
     }
   };
 
@@ -360,7 +369,7 @@ const InvestmentPlan = ({navigation}) => {
         <View style={{flex: 1}}>
           {/* Investment Amount Field */}
           <View style={styles.greyContainer}>
-            <Text style={styles.label1}>{t('Investment Amount')}(AED)</Text>
+            <Text style={styles.label1}>{t('Investment Amount')}</Text>
             <TouchableOpacity
               style={styles.optionButton}
               onPress={() => setModalVisible(true)}>

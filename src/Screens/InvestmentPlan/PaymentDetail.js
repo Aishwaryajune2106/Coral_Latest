@@ -49,7 +49,7 @@ const PaymentDetail = ({navigation}) => {
   const {confirmPayment, loading} = useConfirmPayment();
 
   const {investmentAmount, setInvestmentAmount} = useContext(CountryContext);
-  console.log(investmentAmount, 'investttt');
+  console.log(investmentAmount, 'investtttyyyy');
 
   const showCustomAlert = (title, message) => {
     setAlertTitle(title);
@@ -477,7 +477,7 @@ const PaymentDetail = ({navigation}) => {
       </ScrollView>
       <TouchableOpacity
         style={styles.backToHomeButton}
-        onPress={() => navigation.navigate('Home')}>
+        onPress={() => navigation.navigate('DashBoardStack')}>
         <Text style={styles.backToHomeText}>Back to Home</Text>
       </TouchableOpacity>
     </View>

@@ -31,9 +31,24 @@ export default function Dashboard({navigation}) {
   const [hgfDatacurrency, setHgfDatacurrency] = useState('');
   const [performanceData, setPerformanceData] = useState([]);
   const [balanceData, setBalanceData] = useState([]);
+  const [convertedSharePrice, setConvertedSharePrice] = useState(0);
 
   const [usdRate, setUsdRate] = useState(null);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (
+      datahome?.share_prices &&
+      usdRate &&
+      userCurrency &&
+      usdRate[userCurrency]
+    ) {
+      const converted =
+        parseFloat(datahome?.share_prices) * parseFloat(usdRate[userCurrency]);
+      setConvertedSharePrice(converted.toFixed(2));
+    }
+  }, [datahome, usdRate, userCurrency]);
+
   useEffect(() => {
     // Make the API call to fetch exchange rate
     axios
@@ -145,67 +160,35 @@ export default function Dashboard({navigation}) {
   console.log('own_shares:', datahome?.own_shares);
   console.log('balanceData:', balanceData);
 
-  const [convertedSharePrice, setConvertedSharePrice] = useState(0);
   const [convertedOwnPrice, setConvertedOwnPrice] = useState(0);
   const [convertedbalancePrice, setConvertedbalancePrice] = useState(0);
   const [currency, setCurrency] = useState('');
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     const loadAll = async () => {
-  //       await fetchHgfData();
-  //       await BalanceList();
-  //       const {convertedSharePrice, convertedOwnPrice, convertedbalancePrice} =
-  //         await calculateConvertedPrices();
-  //       setConvertedSharePrice(convertedSharePrice);
-  //       setConvertedOwnPrice(convertedOwnPrice);
-  //       setConvertedbalancePrice(convertedbalancePrice);
-  //     };
-  //     loadAll();
-  //   }, [duration, datahome]), // Add dependencies here
-  // );
-  // useEffect(() => {
-  //   calculateConvertedPrices();
-  // }, [datahome]);
-  // Function to calculate the wallet balance based on the stored rate
-  // const calculateConvertedPrices = async () => {
-  //   try {
-  //     const currencyRate = await AsyncStorage.getItem('userCurrencyRate');
-  //     const currency = await AsyncStorage.getItem('userCurrency');
-  //     setCurrency(currency);
-  //     const rate = JSON.parse(currencyRate);
+  const [userCurrency, setUserCurrency] = useState(null);
+  const aedBalance = balanceData?.u_wallet || 0;
 
-  //     console.log(rate, 'rate');
-  //     console.log(currency, 'currency');
+  useEffect(() => {
+    const getCurrency = async () => {
+      try {
+        const currency = await AsyncStorage.getItem('userCurrency');
+        if (currency) {
+          setUserCurrency(currency);
+        } else {
+          setUserCurrency('INR'); // fallback
+        }
+      } catch (error) {
+        console.error('Error fetching currency:', error);
+        setUserCurrency('INR'); // fallback on error
+      }
+    };
 
-  //     if (rate) {
-  //       // Multiply share price and own price by the currency rate
-  //       const convertedSharePrice = rate * (datahome?.share_prices || 0);
-  //       const convertedOwnPrice = rate * (datahome?.own_shares || 0);
-  //       const convertedbalancePrice = rate * (balanceData?.u_wallet || 0);
+    getCurrency();
+  }, []);
 
-  //       console.log(`Converted Share Price: ${convertedSharePrice}`);
-  //       console.log(`Converted Own Price: ${convertedOwnPrice}`);
-  //       console.log(`Converted balance Price: ${convertedbalancePrice}`);
-
-  //       return {convertedSharePrice, convertedOwnPrice, convertedbalancePrice};
-  //     } else {
-  //       console.log('Rate not found in AsyncStorage');
-  //       return {
-  //         convertedSharePrice: 0,
-  //         convertedOwnPrice: 0,
-  //         convertedbalancePrice: 0,
-  //       };
-  //     }
-  //   } catch (error) {
-  //     console.error('Error retrieving rate from AsyncStorage:', error);
-  //     return {
-  //       convertedSharePrice: 0,
-  //       convertedOwnPrice: 0,
-  //       convertedbalancePrice: 0,
-  //     };
-  //   }
-  // };
+  const convertedBalance =
+    usdRate && userCurrency && usdRate[userCurrency]
+      ? (aedBalance * usdRate[userCurrency]).toFixed(2)
+      : 'Loading...';
 
   const Graphapi = async () => {
     const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
@@ -299,8 +282,8 @@ export default function Dashboard({navigation}) {
   };
 
   // Check if data populates correctly
-  const chartData = performanceData?.map(item => item.return_amount); // Array of values for the chart
-  const labels = performanceData?.map(item => item.year.toString()); // Default empty array
+  const chartData = performanceData?.map(item => item?.return_amount); // Array of values for the chart
+  const labels = performanceData?.map(item => item?.year.toString()); // Default empty array
 
   console.log(performanceData, 'perform');
 
@@ -329,8 +312,7 @@ export default function Dashboard({navigation}) {
 
           <Text style={styles.balance}>{t('Balance')}</Text>
           <Text style={styles.amount}>
-            {/* {convertedbalancePrice} {currency} */}
-            {balanceData?.u_wallet} AED
+            {convertedBalance} {userCurrency}
           </Text>
           <View style={styles.infoRow}>
             <View style={styles.infoCard}>
@@ -342,7 +324,7 @@ export default function Dashboard({navigation}) {
               </View>
               <Text style={styles.infoValue}>
                 {/* {convertedSharePrice} */}
-                {datahome?.share_prices}
+                {convertedSharePrice} {userCurrency}
               </Text>
             </View>
             <View style={styles.infoCard}>

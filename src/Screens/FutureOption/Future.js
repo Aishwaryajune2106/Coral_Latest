@@ -29,6 +29,7 @@ const Future = ({navigation}) => {
 
   const fetchTotalInvestment = async () => {
     const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
+    const userCurrency = await AsyncStorage.getItem('userCurrency'); // e.g., "INR", "USD"
     try {
       const response = await fetch(
         'https://coral.lunarsenterprises.com/wealthinvestment/user/lock/period/list',
@@ -42,69 +43,36 @@ const Future = ({navigation}) => {
 
       const data = await response.json();
       if (data.result) {
-        setTotalInvestment(data.total);
+        const amountInAed = data.total;
+
+        // Fetch conversion rate
+        const rateResponse = await fetch(
+          'https://api.exchangerate-api.com/v4/latest/AED',
+        );
+        const rateData = await rateResponse.json();
+
+        const conversionRate = rateData.rates[userCurrency];
+
+        if (conversionRate) {
+          const convertedAmount = (amountInAed * conversionRate).toFixed(2);
+          setTotalInvestment(`${convertedAmount} ${userCurrency}`);
+        } else {
+          console.warn('Currency not supported:', userCurrency);
+          setTotalInvestment(`${amountInAed} AED`);
+        }
       }
     } catch (error) {
-      console.error('Error fetching total investment:', error);
+      console.error(
+        'Error fetching total investment or converting currency:',
+        error,
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // const [convertedbalancePrice, setConvertedbalancePrice] = useState(0);
-  // const [currency, setCurrency] = useState('');
-  // useEffect(() => {
-  //   const fetchAndCalculatePrices = async () => {
-  //     const {convertedbalancePrice} = await calculateConvertedPrices();
-
-  //     setConvertedbalancePrice(convertedbalancePrice);
-  //   };
-
-  //   fetchAndCalculatePrices();
-  // }, [totalInvestment]);
-  // // Function to calculate the wallet balance based on the stored rate
-  // const calculateConvertedPrices = async () => {
-  //   try {
-  //     const currencyRate = await AsyncStorage.getItem('userCurrencyRate');
-  //     const currency = await AsyncStorage.getItem('userCurrency');
-  //     setCurrency(currency);
-  //     const rate = JSON.parse(currencyRate);
-  //     console.log(rate, 'rate');
-  //     console.log(currency, 'currency');
-
-  //     if (rate) {
-  //       // Multiply share price and own price by the currency rate
-
-  //       const convertedbalancePrice = rate * (totalInvestment || 0);
-
-  //       console.log(`Converted balance Price: ${convertedbalancePrice}`);
-
-  //       return {convertedbalancePrice};
-  //     } else {
-  //       console.log('Rate not found in AsyncStorage');
-  //       return {
-  //         convertedbalancePrice: 0,
-  //       };
-  //     }
-  //   } catch (error) {
-  //     console.error('Error retrieving rate from AsyncStorage:', error);
-  //     return {
-  //       convertedbalancePrice: 0,
-  //     };
-  //   }
-  // };
-  // console.log(convertedbalancePrice, 'convertedbalancePrice');
-
   return (
     <View style={styles.container}>
-      {/* <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}>
-          <Image source={AppImages.Blackbackicon} style={styles.backIcon} />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Future Option</Text>
-      </View> */}
       <ScrollView
         contentContainerStyle={{flexGrow: 1}}
         showsVerticalScrollIndicator={false}>
@@ -118,7 +86,7 @@ const Future = ({navigation}) => {
               {/* <Text style={styles.dateText}>Today, 08 Sept 2019</Text> */}
               <Text style={styles.amountText}>
                 {/* {convertedbalancePrice}{" "}{currency} */}
-                {totalInvestment} AED
+                {convertedbalancePrice} {currency}
               </Text>
             </View>
           </ImageBackground>

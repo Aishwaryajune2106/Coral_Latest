@@ -120,6 +120,9 @@ const AppImages = {
   Chatsend: require('../Assets/chatsend.png'),
   Album: require('../Assets/album.png'),
   Chatback: require('../Assets/chatback.png'),
+  PendingIcon: require('../Assets/pending.png'),
+  Verified: require('../Assets/verified.png'),
+  Rejected: require('../Assets/rejected.png'),
 };
 
 export default AppImages;

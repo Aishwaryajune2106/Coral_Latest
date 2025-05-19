@@ -21,9 +21,9 @@ import CountryContext from '../../Context/CountryContext';
 import {useTranslation} from 'react-i18next';
 
 const Investmentstep3 = ({navigation}) => {
-
-  
   const {
+    investmentAmount,
+    setInvestmentAmount,
     selectedOption,
     setSelectedOption,
     personalDetails,
@@ -31,6 +31,7 @@ const Investmentstep3 = ({navigation}) => {
   } = useContext(CountryContext);
   console.log(selectedOption, personalDetails, 'apple');
   const {t, i18n} = useTranslation();
+  console.log(investmentAmount, 'investmentAmountingg');
 
   const [isModalVisible, setModalVisible] = useState(false);
   const [countryCode, setCountryCode] = useState('+81');
@@ -321,10 +322,13 @@ const Investmentstep3 = ({navigation}) => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}>
-          <Image source={AppImages.Leftarrow} style={[
+          <Image
+            source={AppImages.Leftarrow}
+            style={[
               styles.backIcon,
               i18n.language === 'ar' ? {transform: [{scaleX: -1}]} : {},
-            ]} />
+            ]}
+          />
         </TouchableOpacity>
         <Text style={styles.headerText}>{t('Invest Combination')}</Text>
       </View>
