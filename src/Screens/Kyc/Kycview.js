@@ -5,6 +5,7 @@ import {
   Text,
   View,
   TouchableOpacity,
+  Linking,
 } from 'react-native';
 import React, {useContext, useEffect, useState} from 'react';
 import AppColors from '../../Constants/AppColors';
@@ -12,11 +13,15 @@ import CountryContext from '../../Context/CountryContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppStrings from '../../Constants/AppStrings';
 import AppImages from '../../Constants/AppImages';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 const Kycview = () => {
   const {backImage, frontImage, selectedCountry} = useContext(CountryContext);
   const [kycData, setKycData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [updatedFront, setUpdatedFront] = useState(null);
+  const [updatedBack, setUpdatedBack] = useState(null);
+  const [updatedBank, setUpdatedBank] = useState(null);
 
   useEffect(() => {
     fetchKycData();
@@ -46,10 +51,73 @@ const Kycview = () => {
       setLoading(false);
     }
   };
+  //.............Update Api..............//
 
-  const handleEditImage = side => {
-    // Replace this with navigation or image picker
-    console.log(`Edit ${side} image clicked`);
+
+  const pickImage = async setImageState => {
+    const options = {
+      mediaType: 'photo',
+      includeBase64: false,
+    };
+
+    launchImageLibrary(options, response => {
+      if (response.didCancel || response.errorCode) {
+        console.log('User cancelled image picker');
+        return;
+      }
+
+      const selectedAsset = response.assets?.[0];
+      if (selectedAsset) {
+        setImageState({
+          uri: selectedAsset.uri,
+          type: selectedAsset.type,
+          name: selectedAsset.fileName,
+        });
+      }
+    });
+  };
+  const handleUpdateKYC = async () => {
+    const userId = await AsyncStorage.getItem(AppStrings.USER_ID);
+    const formData = new FormData();
+
+    formData.append('kyc_id', kycData?.uk_id);
+
+    if (updatedFront) {
+      formData.append('front_page', updatedFront);
+    }
+    if (updatedBack) {
+      formData.append('back_page', updatedBack);
+    }
+    if (updatedBank) {
+      formData.append('bank_file', updatedBank);
+    }
+
+    try {
+      const res = await fetch(
+        'https://coral.lunarsenterprises.com/wealthinvestment/user/kyc/re_upload',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            user_id: userId,
+          },
+          body: formData,
+        },
+      );
+
+      const data = await res.json();
+      if (data.result) {
+        alert(data.message);
+        fetchKycData();
+        setUpdatedFront(null);
+        setUpdatedBack(null);
+        setUpdatedBank(null);
+      } else {
+        alert('Upload failed');
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+    }
   };
 
   if (loading) {
@@ -77,8 +145,7 @@ const Kycview = () => {
           {kycData?.uk_reject_message && (
             <TouchableOpacity
               style={styles.editButton}
-              // onPress={() => handleEditImage('front')}
-            >
+              onPress={() => pickImage(setUpdatedFront)}>
               <Image source={AppImages.Edit} style={styles.editIcon} />
             </TouchableOpacity>
           )}
@@ -97,11 +164,63 @@ const Kycview = () => {
           {kycData?.uk_reject_message && (
             <TouchableOpacity
               style={styles.editButton}
-              // onPress={() => handleEditImage('front')}
-            >
+             onPress={() => pickImage(setUpdatedBack)}>
               <Image source={AppImages.Edit} style={styles.editIcon} />
             </TouchableOpacity>
           )}
+        </View>
+      )}
+      {/* UK Bank Statement */}
+      {kycData?.uk_bank_statement && (
+        <View style={[styles.imageWrapper, {alignItems: 'center'}]}>
+          <TouchableOpacity
+            onPress={() => {
+              const url = `https://coral.lunarsenterprises.com${kycData.uk_bank_statement}`;
+              Linking.openURL(url);
+            }}
+            style={styles.pdfContainer}>
+            <Image source={AppImages.Pdf} style={styles.pdfIcon} />
+            <Text style={styles.pdfText}>View Bank Statement</Text>
+          </TouchableOpacity>
+
+          {/* Show Edit if rejected */}
+          {kycData?.uk_reject_message && (
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => pickImage(setUpdatedBank)}>
+              <Image source={AppImages.Edit} style={styles.editIcon} />
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
+      {kycData?.uk_reject_message && (
+        <View style={{marginHorizontal: 20, marginTop: 20}}>
+          {/* <Text style={{marginBottom: 10, fontWeight: '600'}}>Update KYC</Text> */}
+{/* 
+          <TouchableOpacity
+            style={styles.pickButton}
+            onPress={() => pickImage(setUpdatedFront)}>
+            <Text>Select Front Page</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.pickButton}
+            onPress={() => pickImage(setUpdatedBack)}>
+            <Text>Select Back Page</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.pickButton}
+            onPress={() => pickImage(setUpdatedBank)}>
+            <Text>Select Bank File</Text>
+          </TouchableOpacity> */}
+
+          <TouchableOpacity
+            style={styles.updateButton}
+            onPress={handleUpdateKYC}>
+            <Text style={{color: '#fff'}}>Update KYC</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -206,5 +325,35 @@ const styles = StyleSheet.create({
     color: AppColors.perfectgrey,
     fontFamily: 'serif',
     marginLeft: 5,
+  },
+  pdfContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  pdfIcon: {
+    width: 50,
+    height: 50,
+    resizeMode: 'contain',
+  },
+  pdfText: {
+    marginTop: 5,
+    fontSize: 14,
+    color: AppColors.Blue,
+    textDecorationLine: 'underline',
+    fontFamily: 'serif',
+  },
+  updateButton: {
+    marginTop: 15,
+    backgroundColor: AppColors.Blue,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+
+  pickButton: {
+    backgroundColor: '#eee',
+    padding: 10,
+    borderRadius: 6,
+    marginBottom: 10,
   },
 });

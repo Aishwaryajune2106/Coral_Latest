@@ -27,15 +27,7 @@ const Kycthree = ({navigation}) => {
   const [isChecked, setIsChecked] = useState(false); // State for checkbox
   const [showAlert, setShowAlert] = useState(false);
   const handleUpload = () => {
-    Alert.alert(
-      'Upload National Identity Card Front Photo',
-      'Choose an option',
-      [
-        {text: 'Take Photo', onPress: () => pickImage('camera')},
-        {text: 'Upload from Gallery', onPress: () => pickImage('gallery')},
-        {text: 'Cancel', style: 'cancel'},
-      ],
-    );
+    pickImage('gallery'); // Directly trigger gallery upload
   };
 
   const pickImage = type => {
@@ -45,8 +37,6 @@ const Kycthree = ({navigation}) => {
     };
 
     const imageHandler = response => {
-      console.log('Camera Response:', response); // 👈 Add this
-
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.errorCode) {
@@ -56,7 +46,7 @@ const Kycthree = ({navigation}) => {
         const image = {
           uri: asset.uri,
           type: asset.type,
-          name: asset.fileName ?? `photo_${Date.now()}.jpg`, // fallback name
+          name: asset.fileName ?? `photo_${Date.now()}.jpg`,
           size: asset.fileSize,
         };
         setBackImage(image);
@@ -65,11 +55,8 @@ const Kycthree = ({navigation}) => {
       }
     };
 
-    if (type === 'camera') {
-      launchCamera(options, imageHandler);
-    } else if (type === 'gallery') {
-      launchImageLibrary(options, imageHandler);
-    }
+    // Only gallery usage now
+    launchImageLibrary(options, imageHandler);
   };
 
   const handleSubmit = () => {
@@ -158,7 +145,7 @@ const Kycthree = ({navigation}) => {
               {t('Upload National Identity card back photo')}
             </Text>
             <Text style={styles.uploadButton}>{t('Upload')}</Text>
-            <Text style={styles.uploadButton}>{t('Take Photo')}</Text>
+            {/* <Text style={styles.uploadButton}>{t('Take Photo')}</Text> */}
           </TouchableOpacity>
 
           {/* Note */}

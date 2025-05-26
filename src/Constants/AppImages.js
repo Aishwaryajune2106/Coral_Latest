@@ -123,6 +123,7 @@ const AppImages = {
   PendingIcon: require('../Assets/pending.png'),
   Verified: require('../Assets/verified.png'),
   Rejected: require('../Assets/rejected.png'),
+  Pdf: require('../Assets/pdf.png'),
 };
 
 export default AppImages;

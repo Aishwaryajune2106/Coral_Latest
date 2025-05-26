@@ -56,17 +56,13 @@ const Yourphoto = ({navigation}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleUpload = () => {
-    Alert.alert('Upload Your Photo', 'Choose an option', [
-      {text: 'Take Photo', onPress: () => pickImage('camera')},
-      {text: 'Upload from Gallery', onPress: () => pickImage('gallery')},
-      {text: 'Cancel', style: 'cancel'},
-    ]);
+    pickImage('gallery'); // Directly opens gallery
   };
 
-  const pickImage = async type => {
+  const pickImage = async () => {
     const options = {mediaType: 'photo', quality: 1};
 
-    const imageHandler = response => {
+    launchImageLibrary(options, response => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.errorCode) {
@@ -83,11 +79,7 @@ const Yourphoto = ({navigation}) => {
           setUploadedImage(imageData);
         }
       }
-    };
-
-    type === 'camera'
-      ? launchCamera(options, imageHandler)
-      : launchImageLibrary(options, imageHandler);
+    });
   };
 
   const showDatePicker = () => {

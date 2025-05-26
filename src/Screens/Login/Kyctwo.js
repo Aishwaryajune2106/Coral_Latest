@@ -26,86 +26,45 @@ const Kyctwo = ({navigation}) => {
   const [showAlert, setShowAlert] = useState(false);
 
   const handleUpload = () => {
-    Alert.alert(
-      'Upload National Identity Card Front Photo',
-      'Choose an option',
-      [
-        {text: 'Take Photo', onPress: () => pickImage('camera')},
-        {text: 'Upload from Gallery', onPress: () => pickImage('gallery')},
-        {text: 'Cancel', style: 'cancel'},
-      ],
-    );
+    pickImage();
   };
 
-  const pickImage = type => {
+  const pickImage = () => {
     const options = {
       mediaType: 'photo',
       quality: 1,
     };
 
-    if (type === 'camera') {
-      launchCamera(options, response => {
-        if (response.didCancel) {
-          console.log('User cancelled image picker');
-        } else if (response.errorCode) {
-          console.error('Image Picker Error:', response.errorMessage);
-        } else if (response?.assets && response.assets.length > 0) {
-          const imageData = response.assets[0];
-          const imageDetails = {
-            uri: imageData.uri,
-            type: imageData.type,
-            name: imageData.fileName || 'photo.jpg', // fallback name
-            size: imageData.fileSize,
-          };
-          setFrontImage(imageDetails);
-        } else {
-          console.log('Unexpected response:', response);
-        }
-      });
-    } else if (type === 'gallery') {
-      launchImageLibrary(options, response => {
-        if (response.didCancel) {
-          console.log('User cancelled image picker');
-        } else if (response.errorCode) {
-          console.error('Image Picker Error:', response.errorMessage);
-        } else {
-          const imageData = response.assets[0];
-          const imageDetails = {
-            uri: imageData.uri,
-            type: imageData.type,
-            name: imageData.fileName,
-            size: imageData.fileSize,
-          };
-          setFrontImage(imageDetails); // Set the front image with all the details
-        }
-      });
-    }
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorCode) {
+        console.error('Image Picker Error:', response.errorMessage);
+      } else if (response?.assets && response.assets.length > 0) {
+        const imageData = response.assets[0];
+        const imageDetails = {
+          uri: imageData.uri,
+          type: imageData.type,
+          name: imageData.fileName,
+          size: imageData.fileSize,
+        };
+        setFrontImage(imageDetails);
+      }
+    });
   };
 
   const handleSubmit = () => {
     if (!frontImage) {
-      setShowAlert(true); // Show the custom alert
+      setShowAlert(true);
       return;
     }
     navigation.navigate('KycthreeScreen');
   };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        {/* <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}>
-          <Image
-            source={AppImages.greaterarrow} // Replace with the correct image path
-            style={styles.backArrowImage}
-          />
-        </TouchableOpacity>  */}
-
-        {/* <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
-          <Text style={styles.headerTitle}>KYC</Text>
-        </View> */}
-      </View>
+      <View style={styles.header}></View>
 
       {/* Title */}
       <Text style={styles.title}>{t('National ID')}</Text>
@@ -165,7 +124,7 @@ const Kyctwo = ({navigation}) => {
             <TouchableOpacity onPress={handleUpload}>
               <Text style={styles.uploadButton}>{t('Upload')}</Text>
 
-              <Text style={styles.uploadButton}>{t('Take Photo')}</Text>
+              {/* <Text style={styles.uploadButton}>{t('Take Photo')}</Text> */}
             </TouchableOpacity>
           </View>
 

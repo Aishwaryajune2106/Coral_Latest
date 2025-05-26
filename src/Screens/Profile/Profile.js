@@ -61,11 +61,17 @@ export default function Profile({navigation}) {
   console.log(user, 'user');
   useFocusEffect(
     useCallback(() => {
-      fetchHgfData();
-      getStoredLanguage();
-      getNotificationPreference();
+      const fetchAllData = async () => {
+        await fetchUserData();
+        await fetchHgfData();
+        await getStoredLanguage();
+        await getNotificationPreference();
+      };
+
+      fetchAllData();
     }, []),
   );
+
   const fetchHgfData = async () => {
     const user_id = await AsyncStorage.getItem(AppStrings.USER_ID);
     try {
