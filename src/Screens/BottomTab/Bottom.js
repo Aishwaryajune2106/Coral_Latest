@@ -24,6 +24,7 @@ import AppColors from '../../Constants/AppColors';
 import MarketNewsone from '../MarketNews/MarketNewsone';
 import Cwi from '../CWI_Invest/Cwi';
 import {useTranslation} from 'react-i18next';
+import MarketNewstwo from '../MarketNews/MarketNewstwo';
 
 const Bottom = () => {
   const {t, i18n} = useTranslation();
@@ -118,8 +119,8 @@ const Bottom = () => {
         }}
       />
       <BottomTab.Screen
-        name="MarketNewsoneScreen"
-        component={MarketNewsone}
+        name="MarketNewstwoScreen"
+        component={MarketNewstwo}
         options={{
           tabBarIcon: ({focused}) => (
             <Image
