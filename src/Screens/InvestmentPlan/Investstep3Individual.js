@@ -385,6 +385,7 @@ const Investstep3Individual = ({navigation}) => {
                   </View>
                   <TextInput
                     placeholder={t('Full Name')}
+                    maxLength={20}
                     placeholderTextColor={AppColors.Grey}
                     value={personalDetails.fullName}
                     onChangeText={value => handleInputChange('fullName', value)}
@@ -397,6 +398,7 @@ const Investstep3Individual = ({navigation}) => {
                   ) : null}
                   <TextInput
                     placeholder={t('ID Proof')}
+                    maxLength={20}
                     placeholderTextColor={AppColors.Grey}
                     value={personalDetails.idproof}
                     onChangeText={value => handleInputChange('idproof', value)}
@@ -409,6 +411,7 @@ const Investstep3Individual = ({navigation}) => {
                   ) : null}
                   <TextInput
                     placeholder={t('Address')}
+                    maxLength={50}
                     placeholderTextColor={AppColors.Grey}
                     value={personalDetails.address}
                     onChangeText={value => handleInputChange('address', value)}

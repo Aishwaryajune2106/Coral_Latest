@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     color: AppColors.Black,
   },
   backToLogin: {
-    marginTop: '80%',
+    marginTop: '50%',
     alignItems: 'center',
   },
   backToLoginText: {

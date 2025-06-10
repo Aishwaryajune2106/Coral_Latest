@@ -541,7 +541,7 @@ const AddNominee = ({navigation}) => {
           />
           <FlatList
             data={filteredCountries}
-            scrollEnabled={false}
+            // scrollEnabled={false}
             keyExtractor={(item, index) => index.toString()}
             renderItem={renderCountryItem}
             contentContainerStyle={styles.list}
@@ -553,6 +553,7 @@ const AddNominee = ({navigation}) => {
         visible={alertVisible}
         title={alertTitle}
         message={alertMessage}
+        
         onClose={() => setAlertVisible(false)}
       />
     </ScrollView>

@@ -86,7 +86,14 @@ const AddBank = ({navigation}) => {
       console.log(data, 'helloooo');
       if (data.result) {
         setModalVisible(true);
+
+        setTimeout(() => {
+          setModalVisible(false);
+          navigation.goBack();
+        }, 2000); // Waits for 2 seconds before going back
       }
+
+      console.log('API Response Result:', data.result);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -105,6 +112,7 @@ const AddBank = ({navigation}) => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
+            maxLength={50}
             placeholderTextColor={'#757575'}
             placeholder={t('Name as per Bank Account')}
             value={bankDetails.accountName}
@@ -117,6 +125,7 @@ const AddBank = ({navigation}) => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
+            maxLength={20}
             placeholderTextColor={'#757575'}
             placeholder={t('Bank Name')}
             value={bankDetails.bankName}
@@ -129,6 +138,7 @@ const AddBank = ({navigation}) => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
+            maxLength={20}
             placeholderTextColor={'#757575'}
             placeholder={t('Branch Name')}
             value={bankDetails.branchName}
@@ -141,6 +151,7 @@ const AddBank = ({navigation}) => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
+            maxLength={20}
             placeholderTextColor={'#757575'}
             placeholder={t('Account Number')}
             keyboardType="numeric"
@@ -154,6 +165,7 @@ const AddBank = ({navigation}) => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
+            maxLength={15}
             placeholderTextColor={'#757575'}
             placeholder={t('IFSC/IBAN/Routing Number Code')}
             value={bankDetails.ifscCode}
@@ -166,6 +178,7 @@ const AddBank = ({navigation}) => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
+            maxLength={15}
             placeholderTextColor={'#757575'}
             placeholder={t('Swift Code (optional)')}
             value={bankDetails.swiftCode}

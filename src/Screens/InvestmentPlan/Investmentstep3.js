@@ -390,6 +390,7 @@ const Investmentstep3 = ({navigation}) => {
                   </View>
                   <TextInput
                     placeholder={t('Full Name')}
+                    maxLength={20}
                     placeholderTextColor={AppColors.Grey}
                     value={personalDetails.fullName}
                     onChangeText={value => handleInputChange('fullName', value)}
@@ -402,6 +403,7 @@ const Investmentstep3 = ({navigation}) => {
                   ) : null}
                   <TextInput
                     placeholder={t('ID Proof')}
+                    maxLength={20}
                     placeholderTextColor={AppColors.Grey}
                     value={personalDetails.idproof}
                     onChangeText={value => handleInputChange('idproof', value)}
@@ -414,6 +416,7 @@ const Investmentstep3 = ({navigation}) => {
                   ) : null}
                   <TextInput
                     placeholder={t('Address')}
+                    maxLength={50}
                     placeholderTextColor={AppColors.Grey}
                     value={personalDetails.address}
                     onChangeText={value => handleInputChange('address', value)}
@@ -493,7 +496,7 @@ const Investmentstep3 = ({navigation}) => {
           />
           <FlatList
             data={filteredCountries}
-            scrollEnabled={false}
+            // scrollEnabled={false}
             keyExtractor={(item, index) => index.toString()}
             renderItem={renderCountryItem}
             contentContainerStyle={styles.list}

@@ -29,6 +29,7 @@ const Cwi = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
+
   const handlePress = () => {
     if (selectedCard) {
       setSelectedInvestment(selectedCard); // Ensure it's set before navigating

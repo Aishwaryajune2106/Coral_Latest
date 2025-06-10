@@ -105,7 +105,8 @@ const CreateAccount = ({navigation}) => {
         setLoading(false); // Hide loader when registration is successful
         setTimeout(() => {
           navigation.navigate('RegisterVerifyemailScreen', {
-            token: data.token, // Pass the token here
+            token: data.token,
+            email: email, // Pass the token here
           });
         }, 500); // Adjust delay as necessary (500ms is usually enough)
       } else {

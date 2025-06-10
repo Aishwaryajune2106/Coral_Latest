@@ -1,4 +1,4 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image, Modal, StyleSheet, Text, View} from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {TouchableOpacity} from 'react-native';
 import AppColors from '../../Constants/AppColors';
@@ -16,6 +16,9 @@ const Bank = ({navigation}) => {
   const [selectedTab, setSelectedTab] = useState('current');
   const [bankList, setBankList] = useState([]);
   const [nomineeList, setNomineeList] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteItemId, setDeleteItemId] = useState(null);
+  const [deleteType, setDeleteType] = useState(null); // "bank" or "nominee"
 
   //....................BankList....................//
   useFocusEffect(
@@ -154,9 +157,14 @@ const Bank = ({navigation}) => {
             style={styles.icon}
           />
         </TouchableOpacity> */}
-        <TouchableOpacity onPress={() => handleDeleteBank(item.b_id)}>
+        <TouchableOpacity
+          onPress={() => {
+            setDeleteItemId(item.b_id);
+            setDeleteType('bank');
+            setShowDeleteModal(true);
+          }}>
           <Image
-            source={AppImages.Trashicon} // Replace with your delete icon path
+            source={AppImages.Trashicon}
             style={[styles.icon, {marginLeft: 10}]}
           />
         </TouchableOpacity>
@@ -198,9 +206,14 @@ const Bank = ({navigation}) => {
           </View>
         </View>
         <View style={styles.rightSection}>
-          <TouchableOpacity onPress={() => handleDeleteNominee(item.n_id)}>
+          <TouchableOpacity
+            onPress={() => {
+              setDeleteItemId(item.n_id);
+              setDeleteType('nominee');
+              setShowDeleteModal(true);
+            }}>
             <Image
-              source={AppImages.Trashicon} // Replace with your delete icon path
+              source={AppImages.Trashicon}
               style={[styles.icon, {marginLeft: 10}]}
             />
           </TouchableOpacity>
@@ -298,6 +311,57 @@ const Bank = ({navigation}) => {
           </View>
         )}
       </ScrollView>
+
+      <Modal
+        transparent={true}
+        visible={showDeleteModal}
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <View
+            style={{
+              backgroundColor: 'white',
+              padding: 20,
+              borderRadius: 10,
+              width: '80%',
+              alignItems: 'center',
+            }}>
+            <Text style={{fontSize: 16, fontWeight: 'bold', marginBottom: 20}}>
+              Are you sure you want to delete?
+            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+                width: '100%',
+              }}>
+              <TouchableOpacity
+                style={{padding: 10, backgroundColor: 'grey', borderRadius: 5}}
+                onPress={() => setShowDeleteModal(false)}>
+                <Text style={{color: 'white'}}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{padding: 10, backgroundColor: 'red', borderRadius: 5}}
+                onPress={() => {
+                  setShowDeleteModal(false);
+                  if (deleteType === 'bank') {
+                    handleDeleteBank(deleteItemId);
+                  } else if (deleteType === 'nominee') {
+                    handleDeleteNominee(deleteItemId);
+                  }
+                }}>
+                <Text style={{color: 'white'}}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };

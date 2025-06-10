@@ -344,6 +344,7 @@ const InvestPlanIndividual = ({navigation}) => {
           </View>
           <TextInput
             style={styles.input}
+            maxLength={20}
             placeholder={t('Enter amount')}
             keyboardType="numeric"
             value={investmentAmount}
@@ -371,7 +372,8 @@ const InvestPlanIndividual = ({navigation}) => {
               <Text style={styles.label1}>{t('Duration')} (Years)</Text>
               <TextInput
                 style={styles.input}
-                placeholder={t('Enter duration')}
+                maxLength={2}
+                placeholder={t('Enter duration in years')}
                 keyboardType="numeric"
                 value={duration ? String(duration) : ''}
                 onChangeText={text => {

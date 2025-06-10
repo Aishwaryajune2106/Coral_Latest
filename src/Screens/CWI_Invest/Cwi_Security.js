@@ -319,10 +319,13 @@ const Cwi_Security = ({navigation}) => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}>
-          <Image source={AppImages.Leftarrow} style={[
+          <Image
+            source={AppImages.Leftarrow}
+            style={[
               styles.backIcon,
               i18n.language === 'ar' ? {transform: [{scaleX: -1}]} : {},
-            ]} />
+            ]}
+          />
         </TouchableOpacity>
         <Text style={styles.headerText}>{t('CWI Investment')}</Text>
       </View>
@@ -374,6 +377,7 @@ const Cwi_Security = ({navigation}) => {
                   </View>
                   <TextInput
                     placeholder={t('Full Name')}
+                    maxLength={20}
                     placeholderTextColor={AppColors.Grey}
                     value={personalDetails.fullName}
                     onChangeText={value => handleInputChange('fullName', value)}
@@ -386,6 +390,7 @@ const Cwi_Security = ({navigation}) => {
                   ) : null}
                   <TextInput
                     placeholder={t('ID Proof')}
+                    maxLength={20}
                     placeholderTextColor={AppColors.Grey}
                     value={personalDetails.idproof}
                     onChangeText={value => handleInputChange('idproof', value)}
@@ -398,6 +403,7 @@ const Cwi_Security = ({navigation}) => {
                   ) : null}
                   <TextInput
                     placeholder={t('Address')}
+                    maxLength={50}
                     placeholderTextColor={AppColors.Grey}
                     value={personalDetails.address}
                     onChangeText={value => handleInputChange('address', value)}

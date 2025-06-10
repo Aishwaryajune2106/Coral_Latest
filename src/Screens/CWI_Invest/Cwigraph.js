@@ -8,25 +8,56 @@ import {
   Dimensions,
   ActivityIndicator,
 } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {LineChart} from 'react-native-chart-kit';
 import AppImages from '../../Constants/AppImages'; // Ensure you have local image references
 import AppColors from '../../Constants/AppColors'; // Ensure you have a defined color palette
+import AppStrings from '../../Constants/AppStrings';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
-const Cwigraph = ({navigation,route}) => {
+const Cwigraph = ({navigation, route}) => {
   const screenWidth = Dimensions?.get('window').width;
   const {investmentId} = route.params;
-  console.log('investmentId', investmentId);
 
-  // Dummy chart data
-  const chartData = [
-    {ci_industry: 'Tech', ri_return_year: '12.5'},
-    {ci_industry: 'Finance', ri_return_year: '8.2'},
-    {ci_industry: 'Energy', ri_return_year: '9.7'},
-    {ci_industry: 'Retail', ri_return_year: '10.3'},
-  ];
+  const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  console.log('investmentId:', investmentId);
 
+  useEffect(() => {
+    fetchIndustryGrowth();
+  }, []);
 
+  const fetchIndustryGrowth = async () => {
+    try {
+      const response = await axios.post(
+        'https://coral.lunarsenterprises.com/wealthinvestment/user/industry-growth',
+        {
+          industry_id: investmentId,
+        },
+        {
+          headers: {
+            user_id: await AsyncStorage.getItem(AppStrings.USER_ID),
+          },
+        },
+      );
+      console.log('API Response:', response.data);
+
+      if (response.data.result) {
+        const apiData = response?.data?.data?.map(item => ({
+          ci_industry: item.ig_year.toString(),
+          ri_return_year: item.ig_growths.toString(),
+        }));
+        setChartData(apiData);
+      } else {
+        console.log('Error:', response.data.message);
+      }
+    } catch (error) {
+      console.error('API Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -39,7 +70,7 @@ const Cwigraph = ({navigation,route}) => {
         </TouchableOpacity>
         <Text style={styles.headerText}>Current Investment</Text>
 
-        <View style={styles.searchBar}>
+        {/* <View style={styles.searchBar}>
           <View style={styles.leftSection}>
             <Image source={AppImages.Future} style={styles.roundImage} />
             <View style={styles.textContainer}>
@@ -50,19 +81,21 @@ const Cwigraph = ({navigation,route}) => {
             <Text style={styles.totalAmount}>$100K</Text>
             <Text style={styles.investedAmount}>5 yr</Text>
           </View>
-        </View>
+        </View> */}
       </View>
 
       <ScrollView contentContainerStyle={{paddingBottom: 20}}>
         <View style={{marginTop: 50}}>
           <View style={styles.card}>
-            {chartData?.length > 0 ? (
+            {loading ? (
+              <ActivityIndicator color="#4CAF50" size="large" />
+            ) : chartData.length > 0 ? (
               <LineChart
                 data={{
-                  labels: chartData?.map(item => item.ci_industry),
+                  labels: chartData.map(item => item.ci_industry),
                   datasets: [
                     {
-                      data: chartData?.map(item =>
+                      data: chartData.map(item =>
                         parseFloat(item.ri_return_year),
                       ),
                     },
@@ -97,11 +130,9 @@ const Cwigraph = ({navigation,route}) => {
                 }}
               />
             ) : (
-              <ActivityIndicator color="#4CAF50" size="large" />
+              <Text style={{textAlign: 'center'}}>No data available</Text>
             )}
           </View>
-
-       
         </View>
       </ScrollView>
     </View>

@@ -379,6 +379,8 @@ const InvestmentPlan = ({navigation}) => {
           <TextInput
             style={styles.input}
             placeholder={t('Enter amount')}
+            maxLength={20}
+            placeholderTextColor={AppColors.perfectgrey}
             keyboardType="numeric"
             value={investmentAmount}
             onChangeText={text => {
@@ -408,7 +410,9 @@ const InvestmentPlan = ({navigation}) => {
               <Text style={styles.label1}>{t('Duration')} (Years)</Text>
               <TextInput
                 style={styles.input}
-                placeholder={t('Enter duration')}
+                 maxLength={2}
+                placeholderTextColor={AppColors.perfectgrey}
+                placeholder={t('Enter duration in years')}
                 keyboardType="numeric"
                 value={duration ? String(duration) : ''}
                 onChangeText={text => {

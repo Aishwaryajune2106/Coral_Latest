@@ -188,6 +188,7 @@ const Bankkycone = ({navigation}) => {
           style={styles.input}
           placeholder=""
           value={localDetails.nameAsPerBank}
+          maxLength={50}
           onChangeText={value =>
             handleChange('nameAsPerBank', value.replace(/[^a-zA-Z ]/g, ''))
           }
@@ -217,6 +218,7 @@ const Bankkycone = ({navigation}) => {
         <Text style={styles.inputtitle}>*{t('Bank Name')}*</Text>
         <TextInput
           style={styles.input}
+          maxLength={100}
           placeholder=""
           placeholderTextColor={AppColors.darkgrey}
           value={localDetails.bankName}
@@ -227,6 +229,7 @@ const Bankkycone = ({navigation}) => {
         {/* Bank Branch */}
         <Text style={styles.inputtitle}>*{t('Bank Branch')}*</Text>
         <TextInput
+          maxLength={100}
           style={styles.input}
           placeholder=""
           placeholderTextColor={AppColors.darkgrey}
@@ -239,6 +242,7 @@ const Bankkycone = ({navigation}) => {
         <Text style={styles.inputtitle}>*{t('IFSC/IBAN/Routing Number')}*</Text>
         <TextInput
           style={styles.input}
+          maxLength={20}
           placeholder=""
           placeholderTextColor={AppColors.darkgrey}
           value={localDetails.ifscCode}
@@ -247,6 +251,7 @@ const Bankkycone = ({navigation}) => {
         <Text style={styles.inputtitle}>*{t('SWIFT Code (Optional)')}*</Text>
         <TextInput
           style={styles.input}
+          maxLength={20}
           placeholder=""
           placeholderTextColor={AppColors.darkgrey}
           value={localDetails.swiftCode}

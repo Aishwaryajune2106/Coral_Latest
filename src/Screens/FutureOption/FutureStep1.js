@@ -401,7 +401,7 @@ const FutureStep1 = ({navigation}) => {
               <Text style={styles.label1}>{t('Duration')} (Years)</Text>
               <TextInput
                 style={styles.input}
-                placeholder={t('Enter duration')}
+                placeholder={t('Enter duration in years')}
                 keyboardType="numeric"
                 value={duration ? String(duration) : ''}
                 onChangeText={text => {

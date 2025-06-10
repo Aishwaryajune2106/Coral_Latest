@@ -16,12 +16,13 @@ import {useTranslation} from 'react-i18next';
 
 const RegisterVerifyemail = ({navigation, route}) => {
   const {t, i18n} = useTranslation();
-  const {token} = route.params;
+  const {token, email} = route.params;
   const [otp, setOtp] = useState(['', '', '', '']);
   const [resendEnabled, setResendEnabled] = useState(false);
   const [resendMessageVisible, setResendMessageVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState({title: '', message: ''});
+  console.log('token', token, 'email', email);
 
   const handleInputChange = (value, index) => {
     const newOtp = [...otp];
@@ -36,14 +37,36 @@ const RegisterVerifyemail = ({navigation, route}) => {
     }
   };
 
-  const handleGetOtp = () => {
+  const handleGetOtp = async () => {
     const enteredOtp = otp.join('');
-    if (enteredOtp === token) {
-      // showModal('Success', 'OTP verified successfully.');
-      navigation.navigate('RegisterSuccessScreen');
-    } else {
-      // showModal('Invalid OTP', 'The entered OTP is incorrect.');
-      navigation.navigate('RegisterFailScreen');
+
+    try {
+      const response = await fetch(
+        'https://coral.lunarsenterprises.com/wealthinvestment/user/verify_otp',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email,
+            otp: enteredOtp,
+          }),
+        },
+      );
+
+      const data = await response.json();
+      console.log('OTP Verification Response:', data);
+
+      if (data.result) {
+        showModal('Success', 'OTP verified successfully.');
+        // Optionally navigate from modal confirm
+      } else {
+        showModal('Invalid OTP', data.message || 'OTP verification failed.');
+      }
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      showModal('Error', 'Something went wrong. Please try again.');
     }
   };
 

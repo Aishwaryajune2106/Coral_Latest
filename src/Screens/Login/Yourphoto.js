@@ -90,10 +90,26 @@ const Yourphoto = ({navigation}) => {
     setDatePickerVisibility(false);
   };
 
-  const handleConfirm = date => {
-    setDob(date.toLocaleDateString()); // Convert to a readable format (you can adjust the format if necessary)
+const handleConfirm = date => {
+  const today = new Date();
+  const birthDate = new Date(date);
+  const age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  const dayDiff = today.getDate() - birthDate.getDate();
+
+  let is18OrOlder = age > 18 || (age === 18 && (monthDiff > 0 || (monthDiff === 0 && dayDiff >= 0)));
+
+  if (!is18OrOlder) {
+    setModalTitle('Invalid Age');
+    setModalMessage('You must be at least 18 years old to proceed.');
+    setShowModal(true);
     hideDatePicker();
-  };
+    return;
+  }
+
+  setDob(date.toLocaleDateString()); // You can format it differently if needed
+  hideDatePicker();
+};
 
   //....................Api for KYC...................//
   const handleSubmit = async () => {
@@ -267,7 +283,7 @@ const Yourphoto = ({navigation}) => {
           elevation: 5,
           marginTop: 20,
         }}>
-        <Text style={styles.inputtitle}>{t('Please Upload Your Photo')}</Text>
+        {/* <Text style={styles.inputtitle}>{t('Please Upload Your Photo')}</Text> */}
         {/* Date of Birth Section */}
         <Text style={styles.inputtitle}>{t('Date of Birth')}</Text>
         <TouchableOpacity onPress={showDatePicker}>

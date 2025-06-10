@@ -425,6 +425,7 @@ const Futureoption3 = ({navigation, route}) => {
                   </View>
                   <TextInput
                     placeholder={t('Full Name')}
+                     maxLength={20}
                     placeholderTextColor={AppColors.Grey}
                     value={personalDetails.fullName}
                     onChangeText={value => handleInputChange('fullName', value)}
@@ -437,6 +438,7 @@ const Futureoption3 = ({navigation, route}) => {
                   ) : null}
                   <TextInput
                     placeholder={t('ID Proof')}
+                     maxLength={20}
                     placeholderTextColor={AppColors.Grey}
                     value={personalDetails.idproof}
                     onChangeText={value => handleInputChange('idproof', value)}
@@ -449,6 +451,7 @@ const Futureoption3 = ({navigation, route}) => {
                   ) : null}
                   <TextInput
                     placeholder={t('Address')}
+                     maxLength={50}
                     placeholderTextColor={AppColors.Grey}
                     value={personalDetails.address}
                     onChangeText={value => handleInputChange('address', value)}
@@ -467,6 +470,7 @@ const Futureoption3 = ({navigation, route}) => {
                     </TouchableOpacity>
                     <TextInput
                       placeholder={t('Phone Number')}
+                      
                       placeholderTextColor={AppColors.Grey}
                       value={personalDetails.phoneNumber}
                       onChangeText={value =>
