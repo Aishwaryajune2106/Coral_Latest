@@ -167,23 +167,25 @@ export default function Dashboard({navigation}) {
   const [userCurrency, setUserCurrency] = useState(null);
   const aedBalance = balanceData?.u_wallet || 0;
 
-  useEffect(() => {
-    const getCurrency = async () => {
-      try {
-        const currency = await AsyncStorage.getItem('userCurrency');
-        if (currency) {
-          setUserCurrency(currency);
-        } else {
-          setUserCurrency('INR'); // fallback
+  useFocusEffect(
+    useCallback(() => {
+      const getCurrency = async () => {
+        try {
+          const currency = await AsyncStorage.getItem('userCurrency');
+          if (currency) {
+            setUserCurrency(currency);
+          } else {
+            setUserCurrency('INR');
+          }
+        } catch (error) {
+          console.error('Error fetching currency:', error);
+          setUserCurrency('INR');
         }
-      } catch (error) {
-        console.error('Error fetching currency:', error);
-        setUserCurrency('INR'); // fallback on error
-      }
-    };
+      };
 
-    getCurrency();
-  }, []);
+      getCurrency();
+    }, []),
+  );
 
   const convertedBalance =
     usdRate && userCurrency && usdRate[userCurrency]

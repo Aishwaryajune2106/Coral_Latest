@@ -8,7 +8,7 @@ import {
   Dimensions,
   ActivityIndicator,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {LineChart} from 'react-native-chart-kit';
 import AppImages from '../../Constants/AppImages'; // Ensure you have local image references
 import AppColors from '../../Constants/AppColors'; // Ensure you have a defined color palette
@@ -89,13 +89,13 @@ const Cwigraph = ({navigation, route}) => {
           <View style={styles.card}>
             {loading ? (
               <ActivityIndicator color="#4CAF50" size="large" />
-            ) : chartData.length > 0 ? (
+            ) : chartData?.length > 0 ? (
               <LineChart
                 data={{
-                  labels: chartData.map(item => item.ci_industry),
+                  labels: chartData?.map(item => item.ci_industry),
                   datasets: [
                     {
-                      data: chartData.map(item =>
+                      data: chartData?.map(item =>
                         parseFloat(item.ri_return_year),
                       ),
                     },
@@ -103,6 +103,7 @@ const Cwigraph = ({navigation, route}) => {
                 }}
                 width={screenWidth - 60}
                 height={280}
+                fromZero={true} // 👈 this forces the y-axis to start from 0
                 chartConfig={{
                   backgroundColor: '#ffffff',
                   backgroundGradientFrom: '#ffffff',

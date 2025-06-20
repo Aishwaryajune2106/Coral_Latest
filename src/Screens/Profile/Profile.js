@@ -57,14 +57,30 @@ export default function Profile({navigation}) {
     };
 
     fetchUserData();
-  }, []);
+  }, [selectedLanguage]);
   console.log(user, 'user');
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        await getStoredLanguage(); // 🔄 First, fetch language
+        await fetchUserData(); // 🔄 Then fetch user
+        await fetchHgfData(); // 🔄 HGF
+        await getNotificationPreference(); // 🔄 Notification
+      } catch (error) {
+        console.error('Error in fetchAllData:', error);
+      }
+    };
+
+    fetchAllData();
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       const fetchAllData = async () => {
+           await getStoredLanguage();
         await fetchUserData();
         await fetchHgfData();
-        await getStoredLanguage();
+     
         await getNotificationPreference();
       };
 
@@ -90,10 +106,12 @@ export default function Profile({navigation}) {
       console.error('Error fetching data:', error);
     }
   };
-  // Fetch stored language
+  // Fetch stored langua
   const getStoredLanguage = async () => {
     try {
       const lang = await AsyncStorage.getItem('selectedLanguageLabel');
+      console.log('Stored Language Label:', lang); // Debug
+      
       if (lang) {
         setSelectedLanguage(lang);
       }
@@ -101,6 +119,7 @@ export default function Profile({navigation}) {
       console.error('Error fetching stored language:', error);
     }
   };
+  console.log('Stored Language Labell:', selectedLanguage); // Debug
 
   const getNotificationPreference = async () => {
     try {

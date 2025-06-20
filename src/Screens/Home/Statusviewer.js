@@ -12,9 +12,19 @@ export default function Statusviewer({navigation}) {
     const fetchStatuses = async () => {
       try {
         const response = await fetch(
-          'https://coral.lunarsenterprises.com/wealthinvestment/user/offer/list',
+          'https://lunarsenterprises.com:6017/wealthinvestment/user/list/status',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            // If the API expects a request body, add it here. If not, send an empty object or skip it
+            body: JSON.stringify({}),
+          },
         );
+
         const result = await response.json();
+
         if (result.result) {
           // Transform API data to match the statuses structure
           const formattedStatuses = result?.data?.map(item => ({

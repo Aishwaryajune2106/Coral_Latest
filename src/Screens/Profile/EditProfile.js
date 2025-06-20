@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import {Button} from 'react-native-elements';
 import PhoneInput from 'react-native-phone-input';
-import DropDownPicker from 'react-native-dropdown-picker';
+import {Dropdown} from 'react-native-element-dropdown';
 import DocumentPicker from 'react-native-document-picker';
 import AppImages from '../../Constants/AppImages';
 import AppColors from '../../Constants/AppColors';
@@ -39,6 +39,7 @@ const EditProfile = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isCurrencyFocus, setIsCurrencyFocus] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [countryCode, setCountryCode] = useState('+81');
@@ -47,195 +48,210 @@ const EditProfile = ({navigation}) => {
     {label: 'National ID', value: 'national_id'},
     {label: 'Driving License', value: 'driving_license'},
   ]);
+
   const countries = [
     {name: 'Afghanistan', flag: '🇦🇫', currency: 'AFN'},
-    {name: 'Albania', flag: '🇦🇱', currency: 'L'},
+    {name: 'Albania', flag: '🇦🇱', currency: 'ALL'},
     {name: 'Algeria', flag: '🇩🇿', currency: 'DZD'},
-    {name: 'Andorra', flag: '🇦🇩', currency: '€'},
-    {name: 'Angola', flag: '🇦🇴', currency: 'Kz'},
-    {name: 'Antigua and Barbuda', flag: '🇦🇬', currency: 'EC$'},
-    {name: 'Argentina', flag: '🇦🇷', currency: '$'},
-    {name: 'Armenia', flag: '🇦🇲', currency: '֏'},
-    {name: 'Australia', flag: '🇦🇺', currency: 'A$'},
-    {name: 'Austria', flag: '🇦🇹', currency: '€'},
-    {name: 'Azerbaijan', flag: '🇦🇿', currency: '₼'},
-    {name: 'Bahamas', flag: '🇧🇸', currency: 'B$'},
-    {name: 'Bahrain', flag: '🇧🇭', currency: 'BD'},
-    {name: 'Bangladesh', flag: '🇧🇩', currency: '৳'},
-    {name: 'Barbados', flag: '🇧🇧', currency: 'Bds$'},
-    {name: 'Belarus', flag: '🇧🇾', currency: 'Br'},
-    {name: 'Belgium', flag: '🇧🇪', currency: '€'},
-    {name: 'Belize', flag: '🇧🇿', currency: 'BZ$'},
-    {name: 'Benin', flag: '🇧🇯', currency: 'CFA'},
-    {name: 'Bhutan', flag: '🇧🇹', currency: 'Nu.'},
-    {name: 'Bolivia', flag: '🇧🇴', currency: 'Bs.'},
-    {name: 'Bosnia and Herzegovina', flag: '🇧🇦', currency: 'KM'},
-    {name: 'Botswana', flag: '🇧🇼', currency: 'P'},
-    {name: 'Brazil', flag: '🇧🇷', currency: 'R$'},
-    {name: 'Brunei', flag: '🇧🇳', currency: 'B$'},
-    {name: 'Bulgaria', flag: '🇧🇬', currency: 'лв'},
-    {name: 'Burkina Faso', flag: '🇧🇫', currency: 'CFA'},
-    {name: 'Burundi', flag: '🇧🇮', currency: 'FBu'},
-    {name: 'Cambodia', flag: '🇰🇭', currency: '៛'},
-    {name: 'Cameroon', flag: '🇨🇲', currency: 'CFA'},
-    {name: 'Canada', flag: '🇨🇦', currency: 'C$'},
+    {name: 'Andorra', flag: '🇦🇩', currency: 'EUR'},
+    {name: 'Angola', flag: '🇦🇴', currency: 'AOA'},
+    {name: 'Antigua and Barbuda', flag: '🇦🇬', currency: 'XCD'},
+    {name: 'Argentina', flag: '🇦🇷', currency: 'ARS'},
+    {name: 'Armenia', flag: '🇦🇲', currency: 'AMD'},
+    {name: 'Australia', flag: '🇦🇺', currency: 'AUD'},
+    {name: 'Austria', flag: '🇦🇹', currency: 'EUR'},
+    {name: 'Azerbaijan', flag: '🇦🇿', currency: 'AZN'},
+    {name: 'Bahamas', flag: '🇧🇸', currency: 'BSD'},
+    {name: 'Bahrain', flag: '🇧🇭', currency: 'BHD'},
+    {name: 'Bangladesh', flag: '🇧🇩', currency: 'BDT'},
+    {name: 'Barbados', flag: '🇧🇧', currency: 'BBD'},
+    {name: 'Belarus', flag: '🇧🇾', currency: 'BYN'},
+    {name: 'Belgium', flag: '🇧🇪', currency: 'EUR'},
+    {name: 'Belize', flag: '🇧🇿', currency: 'BZD'},
+    {name: 'Benin', flag: '🇧🇯', currency: 'XOF'},
+    {name: 'Bhutan', flag: '🇧🇹', currency: 'BTN'},
+    {name: 'Bolivia', flag: '🇧🇴', currency: 'BOB'},
+    {name: 'Bosnia and Herzegovina', flag: '🇧🇦', currency: 'BAM'},
+    {name: 'Botswana', flag: '🇧🇼', currency: 'BWP'},
+    {name: 'Brazil', flag: '🇧🇷', currency: 'BRL'},
+    {name: 'Brunei', flag: '🇧🇳', currency: 'BND'},
+    {name: 'Bulgaria', flag: '🇧🇬', currency: 'BGN'},
+    {name: 'Burkina Faso', flag: '🇧🇫', currency: 'XOF'},
+    {name: 'Burundi', flag: '🇧🇮', currency: 'BIF'},
+    {name: 'Cambodia', flag: '🇰🇭', currency: 'KHR'},
+    {name: 'Cameroon', flag: '🇨🇲', currency: 'XAF'},
+    {name: 'Canada', flag: '🇨🇦', currency: 'CAD'},
     {name: 'Cape Verde', flag: '🇨🇻', currency: 'CVE'},
-    {name: 'Chad', flag: '🇹🇩', currency: 'CFA'},
+    {name: 'Chad', flag: '🇹🇩', currency: 'XAF'},
     {name: 'Chile', flag: '🇨🇱', currency: 'CLP'},
-    {name: 'China', flag: '🇨🇳', currency: '¥'},
+    {name: 'China', flag: '🇨🇳', currency: 'CNY'},
     {name: 'Colombia', flag: '🇨🇴', currency: 'COP'},
     {name: 'Comoros', flag: '🇰🇲', currency: 'KMF'},
-    {name: 'Congo', flag: '🇨🇬', currency: 'CFA'},
-    {name: 'Costa Rica', flag: '🇨🇷', currency: '₡'},
-    {name: 'Croatia', flag: '🇭🇷', currency: '€'},
+    {name: 'Congo', flag: '🇨🇬', currency: 'XAF'},
+    {name: 'Costa Rica', flag: '🇨🇷', currency: 'CRC'},
+    {name: 'Croatia', flag: '🇭🇷', currency: 'EUR'},
     {name: 'Cuba', flag: '🇨🇺', currency: 'CUP'},
-    {name: 'Cyprus', flag: '🇨🇾', currency: '€'},
-    {name: 'Czech Republic', flag: '🇨🇿', currency: 'Kč'},
-    {name: 'Denmark', flag: '🇩🇰', currency: 'kr'},
-    {name: 'Djibouti', flag: '🇩🇯', currency: 'Fdj'},
-    {name: 'Dominica', flag: '🇩🇲', currency: 'EC$'},
-    {name: 'Dominican Republic', flag: '🇩🇴', currency: 'RD$'},
-    {name: 'Ecuador', flag: '🇪🇨', currency: '$'},
-    {name: 'Egypt', flag: '🇪🇬', currency: 'E£'},
-    {name: 'El Salvador', flag: '🇸🇻', currency: '$'},
-    {name: 'Estonia', flag: '🇪🇪', currency: '€'},
-    {name: 'Ethiopia', flag: '🇪🇹', currency: 'Br'},
-    {name: 'Fiji', flag: '🇫🇯', currency: 'FJ$'},
-    {name: 'Finland', flag: '🇫🇮', currency: '€'},
-    {name: 'France', flag: '🇫🇷', currency: '€'},
-    {name: 'Gabon', flag: '🇬🇦', currency: 'CFA'},
-    {name: 'Gambia', flag: '🇬🇲', currency: 'D'},
-    {name: 'Georgia', flag: '🇬🇪', currency: '₾'},
-    {name: 'Germany', flag: '🇩🇪', currency: '€'},
-    {name: 'Ghana', flag: '🇬🇭', currency: '₵'},
-    {name: 'Greece', flag: '🇬🇷', currency: '€'},
-    {name: 'Grenada', flag: '🇬🇩', currency: 'EC$'},
-    {name: 'Guatemala', flag: '🇬🇹', currency: 'Q'},
-    {name: 'Guinea', flag: '🇬🇳', currency: 'FG'},
-    {name: 'Guyana', flag: '🇬🇾', currency: 'G$'},
-    {name: 'Honduras', flag: '🇭🇳', currency: 'L'},
-    {name: 'Hungary', flag: '🇭🇺', currency: 'Ft'},
-    {name: 'Iceland', flag: '🇮🇸', currency: 'kr'},
-    {name: 'India', flag: '🇮🇳', currency: '₹'},
-    {name: 'Indonesia', flag: '🇮🇩', currency: 'Rp'},
+    {name: 'Cyprus', flag: '🇨🇾', currency: 'EUR'},
+    {name: 'Czech Republic', flag: '🇨🇿', currency: 'CZK'},
+    {name: 'Denmark', flag: '🇩🇰', currency: 'DKK'},
+    {name: 'Djibouti', flag: '🇩🇯', currency: 'DJF'},
+    {name: 'Dominica', flag: '🇩🇲', currency: 'XCD'},
+    {name: 'Dominican Republic', flag: '🇩🇴', currency: 'DOP'},
+    {name: 'Ecuador', flag: '🇪🇨', currency: 'USD'},
+    {name: 'Egypt', flag: '🇪🇬', currency: 'EGP'},
+    {name: 'El Salvador', flag: '🇸🇻', currency: 'USD'},
+    {name: 'Estonia', flag: '🇪🇪', currency: 'EUR'},
+    {name: 'Ethiopia', flag: '🇪🇹', currency: 'ETB'},
+    {name: 'Fiji', flag: '🇫🇯', currency: 'FJD'},
+    {name: 'Finland', flag: '🇫🇮', currency: 'EUR'},
+    {name: 'France', flag: '🇫🇷', currency: 'EUR'},
+    {name: 'Gabon', flag: '🇬🇦', currency: 'XAF'},
+    {name: 'Gambia', flag: '🇬🇲', currency: 'GMD'},
+    {name: 'Georgia', flag: '🇬🇪', currency: 'GEL'},
+    {name: 'Germany', flag: '🇩🇪', currency: 'EUR'},
+    {name: 'Ghana', flag: '🇬🇭', currency: 'GHS'},
+    {name: 'Greece', flag: '🇬🇷', currency: 'EUR'},
+    {name: 'Grenada', flag: '🇬🇩', currency: 'XCD'},
+    {name: 'Guatemala', flag: '🇬🇹', currency: 'GTQ'},
+    {name: 'Guinea', flag: '🇬🇳', currency: 'GNF'},
+    {name: 'Guyana', flag: '🇬🇾', currency: 'GYD'},
+    {name: 'Honduras', flag: '🇭🇳', currency: 'HNL'},
+    {name: 'Hungary', flag: '🇭🇺', currency: 'HUF'},
+    {name: 'Iceland', flag: '🇮🇸', currency: 'ISK'},
+    {name: 'India', flag: '🇮🇳', currency: 'INR'},
+    {name: 'Indonesia', flag: '🇮🇩', currency: 'IDR'},
     {name: 'Iran', flag: '🇮🇷', currency: 'IRR'},
     {name: 'Iraq', flag: '🇮🇶', currency: 'IQD'},
-    {name: 'Ireland', flag: '🇮🇪', currency: '€'},
-    {name: 'Israel', flag: '🇮🇱', currency: '₪'},
-    {name: 'Italy', flag: '🇮🇹', currency: '€'},
-    {name: 'Jamaica', flag: '🇯🇲', currency: 'J$'},
-    {name: 'Japan', flag: '🇯🇵', currency: '¥'},
+    {name: 'Ireland', flag: '🇮🇪', currency: 'EUR'},
+    {name: 'Israel', flag: '🇮🇱', currency: 'ILS'},
+    {name: 'Italy', flag: '🇮🇹', currency: 'EUR'},
+    {name: 'Jamaica', flag: '🇯🇲', currency: 'JMD'},
+    {name: 'Japan', flag: '🇯🇵', currency: 'JPY'},
     {name: 'Jordan', flag: '🇯🇴', currency: 'JOD'},
-    {name: 'Kazakhstan', flag: '🇰🇿', currency: '₸'},
-    {name: 'Kenya', flag: '🇰🇪', currency: 'KSh'},
-    {name: 'Kiribati', flag: '🇰🇮', currency: 'A$'},
-    {name: 'Kuwait', flag: '🇰🇼', currency: 'KD'},
-    {name: 'Kyrgyzstan', flag: '🇰🇬', currency: 'сом'},
-    {name: 'Laos', flag: '🇱🇦', currency: '₭'},
-    {name: 'Latvia', flag: '🇱🇻', currency: '€'},
-    {name: 'Lebanon', flag: '🇱🇧', currency: 'ل.ل'},
-    {name: 'Lesotho', flag: '🇱🇸', currency: 'L'},
-    {name: 'Liberia', flag: '🇱🇷', currency: 'L$'},
+    {name: 'Kazakhstan', flag: '🇰🇿', currency: 'KZT'},
+    {name: 'Kenya', flag: '🇰🇪', currency: 'KES'},
+    {name: 'Kiribati', flag: '🇰🇮', currency: 'AUD'},
+    {name: 'Kuwait', flag: '🇰🇼', currency: 'KWD'},
+    {name: 'Kyrgyzstan', flag: '🇰🇬', currency: 'KGS'},
+    {name: 'Laos', flag: '🇱🇦', currency: 'LAK'},
+    {name: 'Latvia', flag: '🇱🇻', currency: 'EUR'},
+    {name: 'Lebanon', flag: '🇱🇧', currency: 'LBP'},
+    {name: 'Lesotho', flag: '🇱🇸', currency: 'LSL'},
+    {name: 'Liberia', flag: '🇱🇷', currency: 'LRD'},
     {name: 'Libya', flag: '🇱🇾', currency: 'LYD'},
     {name: 'Liechtenstein', flag: '🇱🇮', currency: 'CHF'},
-    {name: 'Lithuania', flag: '🇱🇹', currency: '€'},
-    {name: 'Luxembourg', flag: '🇱🇺', currency: '€'},
-    {name: 'Madagascar', flag: '🇲🇬', currency: 'Ar'},
-    {name: 'Malawi', flag: '🇲🇼', currency: 'MK'},
-    {name: 'Malaysia', flag: '🇲🇾', currency: 'RM'},
-    {name: 'Maldives', flag: '🇲🇻', currency: 'Rf'},
-    {name: 'Mali', flag: '🇲🇱', currency: 'CFA'},
-    {name: 'Malta', flag: '🇲🇹', currency: '€'},
-    {name: 'Marshall Islands', flag: '🇲🇭', currency: 'US$'},
+    {name: 'Lithuania', flag: '🇱🇹', currency: 'EUR'},
+    {name: 'Luxembourg', flag: '🇱🇺', currency: 'EUR'},
+    {name: 'Madagascar', flag: '🇲🇬', currency: 'MGA'},
+    {name: 'Malawi', flag: '🇲🇼', currency: 'MWK'},
+    {name: 'Malaysia', flag: '🇲🇾', currency: 'MYR'},
+    {name: 'Maldives', flag: '🇲🇻', currency: 'MVR'},
+    {name: 'Mali', flag: '🇲🇱', currency: 'XOF'},
+    {name: 'Malta', flag: '🇲🇹', currency: 'EUR'},
+    {name: 'Marshall Islands', flag: '🇲🇭', currency: 'USD'},
     {name: 'Mauritania', flag: '🇲🇷', currency: 'MRU'},
-    {name: 'Mauritius', flag: '🇲🇺', currency: '₨'},
-    {name: 'Mexico', flag: '🇲🇽', currency: '$'},
-    {name: 'Micronesia', flag: '🇫🇲', currency: 'US$'},
-    {name: 'Moldova', flag: '🇲🇩', currency: 'L'},
-    {name: 'Monaco', flag: '🇲🇨', currency: '€'},
-    {name: 'Mongolia', flag: '🇲🇳', currency: '₮'},
-    {name: 'Montenegro', flag: '🇲🇪', currency: '€'},
+    {name: 'Mauritius', flag: '🇲🇺', currency: 'MUR'},
+    {name: 'Mexico', flag: '🇲🇽', currency: 'MXN'},
+    {name: 'Micronesia', flag: '🇫🇲', currency: 'USD'},
+    {name: 'Moldova', flag: '🇲🇩', currency: 'MDL'},
+    {name: 'Monaco', flag: '🇲🇨', currency: 'EUR'},
+    {name: 'Mongolia', flag: '🇲🇳', currency: 'MNT'},
+    {name: 'Montenegro', flag: '🇲🇪', currency: 'EUR'},
     {name: 'Morocco', flag: '🇲🇦', currency: 'MAD'},
-    {name: 'Mozambique', flag: '🇲🇿', currency: 'MT'},
-    {name: 'Myanmar', flag: '🇲🇲', currency: 'K'},
-    {name: 'Namibia', flag: '🇳🇦', currency: 'N$'},
-    {name: 'Nauru', flag: '🇳🇷', currency: 'A$'},
-    {name: 'Nepal', flag: '🇳🇵', currency: '₨'},
-    {name: 'Netherlands', flag: '🇳🇱', currency: '€'},
-    {name: 'New Zealand', flag: '🇳🇿', currency: 'NZ$'},
-    {name: 'Nicaragua', flag: '🇳🇮', currency: 'C$'},
-    {name: 'Niger', flag: '🇳🇪', currency: 'CFA'},
-    {name: 'Nigeria', flag: '🇳🇬', currency: '₦'},
-    {name: 'North Korea', flag: '🇰🇵', currency: '₩'},
-    {name: 'North Macedonia', flag: '🇲🇰', currency: 'ден'},
-    {name: 'Norway', flag: '🇳🇴', currency: 'kr'},
+    {name: 'Mozambique', flag: '🇲🇿', currency: 'MZN'},
+    {name: 'Myanmar', flag: '🇲🇲', currency: 'MMK'},
+    {name: 'Namibia', flag: '🇳🇦', currency: 'NAD'},
+    {name: 'Nauru', flag: '🇳🇷', currency: 'AUD'},
+    {name: 'Nepal', flag: '🇳🇵', currency: 'NPR'},
+    {name: 'Netherlands', flag: '🇳🇱', currency: 'EUR'},
+    {name: 'New Zealand', flag: '🇳🇿', currency: 'NZD'},
+    {name: 'Nicaragua', flag: '🇳🇮', currency: 'NIO'},
+    {name: 'Niger', flag: '🇳🇪', currency: 'XOF'},
+    {name: 'Nigeria', flag: '🇳🇬', currency: 'NGN'},
+    {name: 'North Korea', flag: '🇰🇵', currency: 'KPW'},
+    {name: 'North Macedonia', flag: '🇲🇰', currency: 'MKD'},
+    {name: 'Norway', flag: '🇳🇴', currency: 'NOK'},
     {name: 'Oman', flag: '🇴🇲', currency: 'OMR'},
-    {name: 'Pakistan', flag: '🇵🇰', currency: '₨'},
-    {name: 'Palau', flag: '🇵🇼', currency: 'US$'},
+    {name: 'Pakistan', flag: '🇵🇰', currency: 'PKR'},
+    {name: 'Palau', flag: '🇵🇼', currency: 'USD'},
     {name: 'Palestine', flag: '🇵🇸', currency: 'ILS'},
-    {name: 'Panama', flag: '🇵🇦', currency: 'B/.'},
-    {name: 'Papua New Guinea', flag: '🇵🇬', currency: 'K'},
-    {name: 'Paraguay', flag: '🇵🇾', currency: '₲'},
-    {name: 'Peru', flag: '🇵🇪', currency: 'S/.'},
-    {name: 'Philippines', flag: '🇵🇭', currency: '₱'},
-    {name: 'Poland', flag: '🇵🇱', currency: 'zł'},
-    {name: 'Portugal', flag: '🇵🇹', currency: '€'},
+    {name: 'Panama', flag: '🇵🇦', currency: 'PAB'},
+    {name: 'Papua New Guinea', flag: '🇵🇬', currency: 'PGK'},
+    {name: 'Paraguay', flag: '🇵🇾', currency: 'PYG'},
+    {name: 'Peru', flag: '🇵🇪', currency: 'PEN'},
+    {name: 'Philippines', flag: '🇵🇭', currency: 'PHP'},
+    {name: 'Poland', flag: '🇵🇱', currency: 'PLN'},
+    {name: 'Portugal', flag: '🇵🇹', currency: 'EUR'},
     {name: 'Qatar', flag: '🇶🇦', currency: 'QAR'},
-    {name: 'Romania', flag: '🇷🇴', currency: 'lei'},
-    {name: 'Russia', flag: '🇷🇺', currency: '₽'},
-    {name: 'Rwanda', flag: '🇷🇼', currency: 'FRw'},
-    {name: 'Saint Kitts and Nevis', flag: '🇰🇳', currency: 'EC$'},
-    {name: 'Saint Lucia', flag: '🇱🇨', currency: 'EC$'},
-    {name: 'Saint Vincent and the Grenadines', flag: '🇻🇨', currency: 'EC$'},
-    {name: 'Samoa', flag: '🇼🇸', currency: 'WS$'},
-    {name: 'San Marino', flag: '🇸🇲', currency: '€'},
+    {name: 'Romania', flag: '🇷🇴', currency: 'RON'},
+    {name: 'Russia', flag: '🇷🇺', currency: 'RUB'},
+    {name: 'Rwanda', flag: '🇷🇼', currency: 'RWF'},
+    {name: 'Saint Kitts and Nevis', flag: '🇰🇳', currency: 'XCD'},
+    {name: 'Saint Lucia', flag: '🇱🇨', currency: 'XCD'},
+    {name: 'Saint Vincent and the Grenadines', flag: '🇻🇨', currency: 'XCD'},
+    {name: 'Samoa', flag: '🇼🇸', currency: 'WST'},
+    {name: 'San Marino', flag: '🇸🇲', currency: 'EUR'},
     {name: 'Saudi Arabia', flag: '🇸🇦', currency: 'SAR'},
-    {name: 'Senegal', flag: '🇸🇳', currency: 'CFA'},
-    {name: 'Serbia', flag: '🇷🇸', currency: 'дин'},
-    {name: 'Seychelles', flag: '🇸🇨', currency: 'SR'},
-    {name: 'Sierra Leone', flag: '🇸🇱', currency: 'Le'},
-    {name: 'Singapore', flag: '🇸🇬', currency: 'S$'},
-    {name: 'Slovakia', flag: '🇸🇰', currency: '€'},
-    {name: 'Slovenia', flag: '🇸🇮', currency: '€'},
-    {name: 'Solomon Islands', flag: '🇸🇧', currency: 'SI$'},
-    {name: 'Somalia', flag: '🇸🇴', currency: 'Sh'},
-    {name: 'South Africa', flag: '🇿🇦', currency: 'R'},
-    {name: 'South Korea', flag: '🇰🇷', currency: '₩'},
+    {name: 'Senegal', flag: '🇸🇳', currency: 'XOF'},
+    {name: 'Serbia', flag: '🇷🇸', currency: 'RSD'},
+    {name: 'Seychelles', flag: '🇸🇨', currency: 'SCR'},
+    {name: 'Sierra Leone', flag: '🇸🇱', currency: 'SLL'},
+    {name: 'Singapore', flag: '🇸🇬', currency: 'SGD'},
+    {name: 'Slovakia', flag: '🇸🇰', currency: 'EUR'},
+    {name: 'Slovenia', flag: '🇸🇮', currency: 'EUR'},
+    {name: 'Solomon Islands', flag: '🇸🇧', currency: 'SBD'},
+    {name: 'Somalia', flag: '🇸🇴', currency: 'SOS'},
+    {name: 'South Africa', flag: '🇿🇦', currency: 'ZAR'},
+    {name: 'South Korea', flag: '🇰🇷', currency: 'KRW'},
     {name: 'South Sudan', flag: '🇸🇸', currency: 'SSP'},
-    {name: 'Spain', flag: '🇪🇸', currency: '€'},
-    {name: 'Sri Lanka', flag: '🇱🇰', currency: '₨'},
-    {name: 'Sudan', flag: '🇸🇩', currency: 'ج.س'},
+    {name: 'Spain', flag: '🇪🇸', currency: 'EUR'},
+    {name: 'Sri Lanka', flag: '🇱🇰', currency: 'LKR'},
+    {name: 'Sudan', flag: '🇸🇩', currency: 'SDG'},
     {name: 'Suriname', flag: '🇸🇷', currency: 'SRD'},
-    {name: 'Sweden', flag: '🇸🇪', currency: 'kr'},
+    {name: 'Sweden', flag: '🇸🇪', currency: 'SEK'},
     {name: 'Switzerland', flag: '🇨🇭', currency: 'CHF'},
     {name: 'Syria', flag: '🇸🇾', currency: 'SYP'},
-    {name: 'Tajikistan', flag: '🇹🇯', currency: 'SM'},
+    {name: 'Tajikistan', flag: '🇹🇯', currency: 'TJS'},
     {name: 'Tanzania', flag: '🇹🇿', currency: 'TZS'},
-    {name: 'Thailand', flag: '🇹🇭', currency: '฿'},
-    {name: 'Timor-Leste', flag: '🇹🇱', currency: '$'},
-    {name: 'Togo', flag: '🇹🇬', currency: 'CFA'},
-    {name: 'Tonga', flag: '🇹🇴', currency: 'T$'},
-    {name: 'Trinidad and Tobago', flag: '🇹🇹', currency: 'TT$'},
-    {name: 'Tunisia', flag: '🇹🇳', currency: 'DT'},
-    {name: 'Turkey', flag: '🇹🇷', currency: '₺'},
+    {name: 'Thailand', flag: '🇹🇭', currency: 'THB'},
+    {name: 'Timor-Leste', flag: '🇹🇱', currency: 'USD'},
+    {name: 'Togo', flag: '🇹🇬', currency: 'XOF'},
+    {name: 'Tonga', flag: '🇹🇴', currency: 'TOP'},
+    {name: 'Trinidad and Tobago', flag: '🇹🇹', currency: 'TTD'},
+    {name: 'Tunisia', flag: '🇹🇳', currency: 'TND'},
+    {name: 'Turkey', flag: '🇹🇷', currency: 'TRY'},
     {name: 'Turkmenistan', flag: '🇹🇲', currency: 'TMT'},
-    {name: 'Tuvalu', flag: '🇹🇻', currency: 'A$'},
+    {name: 'Tuvalu', flag: '🇹🇻', currency: 'AUD'},
     {name: 'Uganda', flag: '🇺🇬', currency: 'UGX'},
-    {name: 'Ukraine', flag: '🇺🇦', currency: '₴'},
+    {name: 'Ukraine', flag: '🇺🇦', currency: 'UAH'},
     {name: 'United Arab Emirates', flag: '🇦🇪', currency: 'AED'},
-    {name: 'United Kingdom', flag: '🇬🇧', currency: '£'},
-    {name: 'United States', flag: '🇺🇸', currency: '$'},
+    {name: 'United Kingdom', flag: '🇬🇧', currency: 'GBP'},
+    {name: 'United States', flag: '🇺🇸', currency: 'USD'},
     {name: 'Uruguay', flag: '🇺🇾', currency: 'UYU'},
-    {name: 'Uzbekistan', flag: '🇺🇿', currency: 'лв'},
-    {name: 'Vanuatu', flag: '🇻🇺', currency: 'VT'},
-    {name: 'Vatican City', flag: '🇻🇦', currency: '€'},
-    {name: 'Venezuela', flag: '🇻🇪', currency: 'Bs.'},
-    {name: 'Vietnam', flag: '🇻🇳', currency: '₫'},
-    {name: 'Yemen', flag: '🇾🇪', currency: '﷼'},
-    {name: 'Zambia', flag: '🇿🇲', currency: 'ZK'},
-    {name: 'Zimbabwe', flag: '🇿🇼', currency: 'Z$'},
-    // Extend the list further as required
+    {name: 'Uzbekistan', flag: '🇺🇿', currency: 'UZS'},
+    {name: 'Vanuatu', flag: '🇻🇺', currency: 'VUV'},
+    {name: 'Vatican City', flag: '🇻🇦', currency: 'EUR'},
+    {name: 'Venezuela', flag: '🇻🇪', currency: 'VES'},
+    {name: 'Vietnam', flag: '🇻🇳', currency: 'VND'},
+    {name: 'Yemen', flag: '🇾🇪', currency: 'YER'},
+    {name: 'Zambia', flag: '🇿🇲', currency: 'ZMW'},
+    {name: 'Zimbabwe', flag: '🇿🇼', currency: 'ZWL'},
   ];
+
+  // Create currency dropdown data from countries array
+  const currencyData = countries.map(country => ({
+    label: `${country.currency} - ${country.name}`,
+    value: country.currency,
+    flag: country.flag,
+  }));
+
+  // Remove duplicates and sort
+  const uniqueCurrencies = currencyData
+    .filter(
+      (currency, index, self) =>
+        index === self.findIndex(c => c.value === currency.value),
+    )
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   const handleFileUpload = async () => {
     try {
@@ -255,6 +271,7 @@ const EditProfile = ({navigation}) => {
       }
     }
   };
+
   const [profile, setProfile] = useState({
     name: '',
     email: '',
@@ -274,16 +291,15 @@ const EditProfile = ({navigation}) => {
     try {
       const response = await axios.get(
         'https://coral.lunarsenterprises.com/wealthinvestment/user',
-
         {
           headers: {
-            user_id: user_id, // Replace with actual user_id
+            user_id: user_id,
           },
         },
       );
 
       if (response.data.result) {
-        const userData = response.data.data[0]; // Assuming first user
+        const userData = response.data.data[0];
         setProfile({
           name: userData.u_name || '',
           email: userData.u_email || '',
@@ -315,7 +331,6 @@ const EditProfile = ({navigation}) => {
       u_gender: profile.gender,
       u_address: profile.address,
       u_mobile: Number(profile.phone),
-
       u_country: profile.country,
     };
 
@@ -341,11 +356,13 @@ const EditProfile = ({navigation}) => {
       Alert.alert('Error', 'Failed to update profile');
     }
   };
+
   // Filtered country list based on search
   const filteredCountries =
     countries?.filter(country =>
       country?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
     ) || [];
+
   // Render Country Item
   const renderCountryItem = ({item}) => (
     <TouchableOpacity
@@ -363,7 +380,8 @@ const EditProfile = ({navigation}) => {
         }}>{`${item.flag} ${item.name} (${item.currency})`}</Text>
     </TouchableOpacity>
   );
-  // ✅ Fix: Function to close modal
+
+  // Function to close modal
   const handleBackToLogin = () => {
     navigation.goBack();
   };
@@ -379,13 +397,39 @@ const EditProfile = ({navigation}) => {
         editable={false}
       />
 
-      {/* Currency Name */}
-
+      {/* Currency Dropdown */}
       <Text style={styles.label}>{t('Currency')}</Text>
-      <TextInput
-        style={styles.input}
+      <Dropdown
+        style={[
+          styles.dropdown,
+          isCurrencyFocus && styles.focusedDropdown, // or {borderColor: AppColors.Yellow}
+        ]}
+        placeholderStyle={styles.placeholderStyle}
+        selectedTextStyle={styles.selectedTextStyle}
+        inputSearchStyle={styles.inputSearchStyle}
+        iconStyle={styles.iconStyle}
+        containerStyle={styles.dropdownContainer} // Add this for list container
+        itemContainerStyle={styles.dropdownItem} // Add this for individual items
+        itemTextStyle={styles.dropdownItemText} // Add this for item text
+        data={uniqueCurrencies}
+        search
+        maxHeight={300}
+        labelField="label"
+        valueField="value"
+        placeholder={!isCurrencyFocus ? 'Select Currency' : '...'}
+        searchPlaceholder="Search currency..."
         value={profile.currency}
-        onChangeText={text => setProfile({...profile, currency: text})}
+        onFocus={() => setIsCurrencyFocus(true)}
+        onBlur={() => setIsCurrencyFocus(false)}
+        onChange={item => {
+          setProfile({...profile, currency: item.value});
+          setIsCurrencyFocus(false);
+        }}
+        renderLeftIcon={() => (
+          <View style={styles.icon}>
+            <Text style={styles.iconText}>💰</Text>
+          </View>
+        )}
       />
 
       {/* Email */}
@@ -397,6 +441,7 @@ const EditProfile = ({navigation}) => {
         onChangeText={text => setProfile({...profile, email: text})}
         editable={false}
       />
+
       {/* Phone Number */}
       <Text style={styles.label}>{t('Phone Number')}</Text>
       <View style={styles.phoneContainer}>
@@ -451,6 +496,7 @@ const EditProfile = ({navigation}) => {
         titleStyle={styles.buttonText}
         onPress={handleEditProfile}
       />
+
       {/* Success Modal */}
       <Modal transparent={true} visible={modalVisible} animationType="slide">
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
@@ -535,6 +581,7 @@ const styles = StyleSheet.create({
     borderColor: AppColors.Grey,
     borderWidth: 0.5,
     borderRadius: 20,
+    padding: 10,
   },
   uploadContainer: {
     flexDirection: 'row',
