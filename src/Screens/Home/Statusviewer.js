@@ -3,58 +3,54 @@ import {View, Text, Image, StyleSheet} from 'react-native';
 import AppImages from '../../Constants/AppImages';
 
 export default function Statusviewer({navigation}) {
-  const [statuses, setStatuses] = useState([]); // State for storing statuses from API
+  const [statuses, setStatuses] = useState([]);
   const [currentStatusIndex, setCurrentStatusIndex] = useState(0);
-  const duration = 3000; // Duration for each status in milliseconds (3 seconds)
+  const duration = 3000; // 3 seconds per status
 
-  // Fetch data from the API
   useEffect(() => {
     const fetchStatuses = async () => {
       try {
         const response = await fetch(
-          'https://lunarsenterprises.com:6017/wealthinvestment/user/list/status',
+          'https://coral.lunarsenterprises.com/wealthinvestment/user/list/status',
           {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            // If the API expects a request body, add it here. If not, send an empty object or skip it
             body: JSON.stringify({}),
           },
         );
 
         const result = await response.json();
 
-        if (result.result) {
-          // Transform API data to match the statuses structure
-          const formattedStatuses = result?.data?.map(item => ({
-            image: `https://coral.lunarsenterprises.com/${item.o_file}`,
-            description: item.o_description || 'No description available',
+        if (result.result && Array.isArray(result.status)) {
+          const formattedStatuses = result.status.map(item => ({
+            image: `https://coral.lunarsenterprises.com/${item.st_image}`,
+            description: item.st_status, // Optional: you can display or log this
           }));
           setStatuses(formattedStatuses);
         } else {
-          console.error('Failed to retrieve data:', result.message);
+          console.error('API error:', result.message);
         }
       } catch (error) {
-        console.error('Error fetching API data:', error);
+        console.error('Network error:', error);
       }
     };
 
     fetchStatuses();
   }, []);
 
-  // Handle status viewing logic
   useEffect(() => {
-    if (statuses?.length > 0) {
+    if (statuses.length > 0) {
       const timer = setTimeout(() => {
         if (currentStatusIndex < statuses.length - 1) {
-          setCurrentStatusIndex(currentStatusIndex + 1);
+          setCurrentStatusIndex(prev => prev + 1);
         } else {
-          navigation.goBack(); // Close the viewer when all statuses are done
+          navigation.goBack(); // End of statuses
         }
       }, duration);
 
-      return () => clearTimeout(timer); // Clear timer on component unmount or index change
+      return () => clearTimeout(timer);
     }
   }, [currentStatusIndex, statuses]);
 
@@ -63,20 +59,26 @@ export default function Statusviewer({navigation}) {
 
   return (
     <View style={styles.container}>
-      {/* Progress bar */}
       <View style={styles.progressBarContainer}>
         {statuses?.map((_, index) => (
           <View
             key={index}
             style={[
               styles.progressBar,
-              {flex: index <= currentStatusIndex ? 1 : 0},
+              {
+                flex: 1,
+                backgroundColor:
+                  index < currentStatusIndex
+                    ? '#888'
+                    : index === currentStatusIndex
+                    ? '#fff'
+                    : '#333',
+              },
             ]}
           />
         ))}
       </View>
 
-      {/* Status image */}
       {currentImage ? (
         <Image source={{uri: currentImage}} style={styles.statusImage} />
       ) : (
@@ -102,7 +104,6 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#FFF',
     marginHorizontal: 2,
     borderRadius: 2,
   },

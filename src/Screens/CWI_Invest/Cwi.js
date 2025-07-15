@@ -146,7 +146,14 @@ const Cwi = ({navigation}) => {
         navigation.navigate('CwiGraphScreen', {investmentId: item.tc_id});
       }}>
       <View style={styles.leftSection}>
-        <Image source={AppImages.Future} style={styles.roundImage} />
+        <Image
+          source={
+            item?.tc_file
+              ? {uri: `https://coral.lunarsenterprises.com/${item.tc_file}`}
+              : AppImages.SplashScreen
+          }
+          style={styles.roundImage}
+        />
         <View style={styles.textContainer}>
           <Text style={styles.projectName}>{item.tc_name}</Text>
           <Text style={styles.subCompany}>
@@ -157,8 +164,9 @@ const Cwi = ({navigation}) => {
       </View>
       <View style={styles.rightSection}>
         <Text style={styles.totalAmount}>
-          {item.tc_minimum_investment?.toLocaleString()}
+          {item.tc_current_year?.toLocaleString()}
         </Text>
+        <Text style={styles.totalAmount}>{item.tc_growth_percentage}%</Text>
       </View>
     </TouchableOpacity>
   );
@@ -169,7 +177,15 @@ const Cwi = ({navigation}) => {
         style={styles.card}
         onPress={() => handleItemPress(item)}>
         <View style={styles.leftSection}>
-          <Image source={AppImages.Future} style={styles.roundImage} />
+          <Image
+            source={
+              item?.fi_file
+                ? {uri: `https://coral.lunarsenterprises.com/${item.fi_file}`}
+                : AppImages.SplashScreen
+            }
+            style={styles.roundImage}
+          />
+
           <View style={styles.textContainer}>
             <Text style={styles.projectName}>{item.fi_industries}</Text>
           </View>
@@ -401,8 +417,8 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     // marginHorizontal: 5,
     marginBottom: 20,
-    borderRadius: 8,
-    elevation: 2,
+    borderRadius: 18,
+    // elevation: 1,
   },
   leftSection: {
     flexDirection: 'row',
@@ -413,7 +429,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     marginRight: 10,
-    tintColor: '#EDEFF8',
+    // tintColor: '#EDEFF8',
   },
   textContainer: {
     flexDirection: 'column',
@@ -433,13 +449,13 @@ const styles = StyleSheet.create({
   },
   rightSection: {
     alignItems: 'flex-end',
+    textAlign: 'justify',
   },
   totalAmount: {
     fontSize: 15,
-
-    // fontWeight: 'bold',
+    
     color: '#000',
-    // fontFamily: 'serif',
+
   },
   investedAmount: {
     fontSize: 13,

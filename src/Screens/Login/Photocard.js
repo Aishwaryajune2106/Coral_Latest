@@ -1,5 +1,12 @@
 import React, {useContext} from 'react';
-import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import AppImages from '../../Constants/AppImages';
 import AppColors from '../../Constants/AppColors';
 import CountryContext from '../../Context/CountryContext';
@@ -11,51 +18,57 @@ const Photocard = ({navigation}) => {
   console.log(backImage, frontImage, selectedCountry, 'data');
 
   return (
-    <View style={styles.container}>
-      {/* Back Button */}
-      {/* <TouchableOpacity
+    <ScrollView contentContainerStyle={styles.scrollContent}>
+      <View style={styles.container}>
+        {/* Back Button */}
+        {/* <TouchableOpacity
         onPress={() => navigation.goBack()}
         style={styles.backButton}>
         <Image source={AppImages.greaterarrow} style={styles.backArrowImage} />
       </TouchableOpacity> */}
 
-      {/* Title */}
-      <Text style={styles.title}>{t('Photo ID Card')}</Text>
-      <Text style={styles.subtitle}>
-        {t('Please point the camera at the ID card')}
-      </Text>
+        {/* Title */}
+        <Text style={styles.title}>{t('Photo ID Card')}</Text>
+        <Text style={styles.subtitle}>
+          {t('Please point the camera at the ID card')}
+        </Text>
 
-      {/* Image Section */}
-      <View style={styles.imageContainer}>
-        <Image source={{uri: frontImage.uri}} style={styles.image} />
-        <View style={styles.imageSpacer} />
-        <Image source={{uri: backImage.uri}} style={styles.image} />
-      </View>
+        {/* Image Section */}
+        <View style={styles.imageContainer}>
+          <Image source={{uri: frontImage.uri}} style={styles.image} />
+          <View style={styles.imageSpacer} />
+          <Image source={{uri: backImage.uri}} style={styles.image} />
+        </View>
 
-      {/* Buttons */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.tryAgainButton}
-          onPress={() => navigation.goBack()}>
-          <Text style={styles.tryAgainText}>{t('TRY AGAIN')}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.continueButton}
-          onPress={() => navigation.navigate('BankkyconeScreen')}>
-          <Text style={styles.continueText}>{t('CONTINUE')}</Text>
-        </TouchableOpacity>
+        {/* Buttons */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.tryAgainButton}
+            onPress={() => navigation.goBack()}>
+            <Text style={styles.tryAgainText}>{t('TRY AGAIN')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.continueButton}
+            onPress={() => navigation.navigate('BankkyconeScreen')}>
+            <Text style={styles.continueText}>{t('CONTINUE')}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingHorizontal: 20,
-    paddingTop: 40,
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingTop: 40,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
+  },
+  container: {
+    width: '100%',
     alignItems: 'center',
   },
   backButton: {

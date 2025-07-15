@@ -164,7 +164,7 @@ const InvestPlanIndividual = ({navigation}) => {
         setCustomAlert({
           visible: true,
           title: 'Error',
-          message: 'Please select a profit modal.',
+          message: 'Please select a Profit Model.',
         });
         setIsLoading(false);
         return null;
@@ -292,7 +292,7 @@ const InvestPlanIndividual = ({navigation}) => {
             returnAmount: return_amount,
             percentageReturn: percentage,
           },
-          'chartData12344444',
+          'investment Info',
         );
 
         navigation.navigate('InvestReturnIndividualScreen', {
@@ -392,7 +392,7 @@ const InvestPlanIndividual = ({navigation}) => {
           )}
           {showProfitModal && (
             <>
-              <Text style={styles.label}>{t('Select Profit Modal')}</Text>
+              <Text style={styles.label}>{t('Select Profit Model')}</Text>
               <View style={styles.checkboxContainer}>
                 <TouchableOpacity
                   style={[

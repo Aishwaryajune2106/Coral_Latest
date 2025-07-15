@@ -73,7 +73,7 @@
   "Investment Amount": "مبلغ الاستثمار",
   "Amount should not be less than 52,000 AED": "يجب ألا يقل المبلغ عن 52,000 درهم إماراتي",
   "Investment End Date": "تاريخ انتهاء الاستثمار",
-  "Select Profit Modal": "اختر نموذج الربح",
+  "Select Profit Model": "اختر نموذج الربح",
   "Fixed": "ثابت",
   "Flexible": "مرن",
   "Select Withdrawal Frequency": "اختر تكرار السحب",
@@ -92,7 +92,7 @@
   "Estimated Profit Growth": "النمو المتوقع للأرباح",
   "End Date": "تاريخ الانتهاء",
   "Investment Mode": "وضع الاستثمار",
-  "Profit Modal": "نموذج الأرباح",
+  "Profit Model": "نموذج الأرباح",
   "CONTINUE": "متابعة",
   "Security Assurance": "ضمان الأمان",
   "Select Security Option": "اختر خيار الأمان",
@@ -348,5 +348,6 @@
   "UPDATE BANK": "تحديث البنك",
   "Bank Edited Successful": "تم تعديل البنك بنجاح",
   "Type message": "اكتب رسالة",
-  "OK": "حسنًا"
+  "OK": "حسنًا",
+  "MPin": "الرقم السري"
 }

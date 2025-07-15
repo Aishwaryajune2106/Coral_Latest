@@ -72,11 +72,11 @@ const Notification = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.bellContainer}
         onPress={() => alert('Notifications')}>
         <Image source={AppImages.Greynotify} style={styles.bellIcon} />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <ScrollView
         contentContainerStyle={{flexGrow: 1}}
         showsVerticalScrollIndicator={false}>

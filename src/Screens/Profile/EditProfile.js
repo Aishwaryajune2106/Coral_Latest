@@ -97,9 +97,9 @@ const EditProfile = ({navigation}) => {
     {name: 'Djibouti', flag: '🇩🇯', currency: 'DJF'},
     {name: 'Dominica', flag: '🇩🇲', currency: 'XCD'},
     {name: 'Dominican Republic', flag: '🇩🇴', currency: 'DOP'},
-    {name: 'Ecuador', flag: '🇪🇨', currency: 'USD'},
+    // {name: 'Ecuador', flag: '🇪🇨', currency: 'USD'},
     {name: 'Egypt', flag: '🇪🇬', currency: 'EGP'},
-    {name: 'El Salvador', flag: '🇸🇻', currency: 'USD'},
+    // {name: 'El Salvador', flag: '🇸🇻', currency: 'USD'},
     {name: 'Estonia', flag: '🇪🇪', currency: 'EUR'},
     {name: 'Ethiopia', flag: '🇪🇹', currency: 'ETB'},
     {name: 'Fiji', flag: '🇫🇯', currency: 'FJD'},
@@ -148,11 +148,11 @@ const EditProfile = ({navigation}) => {
     {name: 'Maldives', flag: '🇲🇻', currency: 'MVR'},
     {name: 'Mali', flag: '🇲🇱', currency: 'XOF'},
     {name: 'Malta', flag: '🇲🇹', currency: 'EUR'},
-    {name: 'Marshall Islands', flag: '🇲🇭', currency: 'USD'},
+    // {name: 'Marshall Islands', flag: '🇲🇭', currency: 'USD'},
     {name: 'Mauritania', flag: '🇲🇷', currency: 'MRU'},
     {name: 'Mauritius', flag: '🇲🇺', currency: 'MUR'},
     {name: 'Mexico', flag: '🇲🇽', currency: 'MXN'},
-    {name: 'Micronesia', flag: '🇫🇲', currency: 'USD'},
+    // {name: 'Micronesia', flag: '🇫🇲', currency: 'USD'},
     {name: 'Moldova', flag: '🇲🇩', currency: 'MDL'},
     {name: 'Monaco', flag: '🇲🇨', currency: 'EUR'},
     {name: 'Mongolia', flag: '🇲🇳', currency: 'MNT'},
@@ -173,7 +173,7 @@ const EditProfile = ({navigation}) => {
     {name: 'Norway', flag: '🇳🇴', currency: 'NOK'},
     {name: 'Oman', flag: '🇴🇲', currency: 'OMR'},
     {name: 'Pakistan', flag: '🇵🇰', currency: 'PKR'},
-    {name: 'Palau', flag: '🇵🇼', currency: 'USD'},
+    // {name: 'Palau', flag: '🇵🇼', currency: 'USD'},
     {name: 'Palestine', flag: '🇵🇸', currency: 'ILS'},
     {name: 'Panama', flag: '🇵🇦', currency: 'PAB'},
     {name: 'Papua New Guinea', flag: '🇵🇬', currency: 'PGK'},
@@ -214,7 +214,7 @@ const EditProfile = ({navigation}) => {
     {name: 'Tajikistan', flag: '🇹🇯', currency: 'TJS'},
     {name: 'Tanzania', flag: '🇹🇿', currency: 'TZS'},
     {name: 'Thailand', flag: '🇹🇭', currency: 'THB'},
-    {name: 'Timor-Leste', flag: '🇹🇱', currency: 'USD'},
+    // {name: 'Timor-Leste', flag: '🇹🇱', currency: 'USD'},
     {name: 'Togo', flag: '🇹🇬', currency: 'XOF'},
     {name: 'Tonga', flag: '🇹🇴', currency: 'TOP'},
     {name: 'Trinidad and Tobago', flag: '🇹🇹', currency: 'TTD'},
@@ -247,11 +247,13 @@ const EditProfile = ({navigation}) => {
 
   // Remove duplicates and sort
   const uniqueCurrencies = currencyData
-    .filter(
-      (currency, index, self) =>
-        index === self.findIndex(c => c.value === currency.value),
-    )
+    // .filter(
+    //   (currency, index, self) =>
+    //     index === self.findIndex(c => c.value === currency.value),
+    // )
     .sort((a, b) => a.label.localeCompare(b.label));
+    console.log(uniqueCurrencies,"uniqueCurrencies`");
+    
 
   const handleFileUpload = async () => {
     try {

@@ -77,10 +77,10 @@ export default function Profile({navigation}) {
   useFocusEffect(
     useCallback(() => {
       const fetchAllData = async () => {
-           await getStoredLanguage();
+        await getStoredLanguage();
         await fetchUserData();
         await fetchHgfData();
-     
+
         await getNotificationPreference();
       };
 
@@ -111,7 +111,7 @@ export default function Profile({navigation}) {
     try {
       const lang = await AsyncStorage.getItem('selectedLanguageLabel');
       console.log('Stored Language Label:', lang); // Debug
-      
+
       if (lang) {
         setSelectedLanguage(lang);
       }
@@ -219,6 +219,13 @@ export default function Profile({navigation}) {
           <Image source={AppImages.Language} style={styles.rowIcon} />
           <Text style={styles.rowText}>{t('Language')}</Text>
           <Text style={styles.rightText}>{selectedLanguage}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.row}
+          onPress={() => navigation.navigate('PinGenerateScreen')}>
+          <Image source={AppImages.Pin} style={styles.rowIcon} />
+          <Text style={styles.rowText}>{t('MPin')}</Text>
+          
         </TouchableOpacity>
       </View>
 

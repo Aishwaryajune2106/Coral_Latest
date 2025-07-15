@@ -9,13 +9,48 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AppStrings from './src/Constants/AppStrings';
 import DeviceInfo from 'react-native-device-info';
 import {StripeProvider} from '@stripe/stripe-react-native';
+import {Linking} from 'react-native';
+import { Alert } from 'react-native';
 
 const App = () => {
   useEffect(() => {
     checkPermission();
-
+    checkAppUpdate(); // 👈 Call update checker
     checkNotifications();
   }, []);
+
+  const checkAppUpdate = async () => {
+    try {
+      const latestVersion = await VersionCheck.getLatestVersion();
+      const currentVersion = await VersionCheck.getCurrentVersion();
+
+      console.log('Latest:', latestVersion, '| Current:', currentVersion);
+
+      const isNeeded = VersionCheck.needUpdate({currentVersion, latestVersion});
+      if (isNeeded?.isNeeded) {
+        const storeUrl = await VersionCheck.getStoreUrl();
+        Alert.alert(
+          'Update Available',
+          'A new version of the app is available. Please update to continue.',
+          [
+            {
+              text: 'Update',
+              onPress: () => {
+                Linking.openURL(storeUrl);
+              },
+            },
+            {
+              text: 'Later',
+              style: 'cancel',
+            },
+          ],
+          {cancelable: false},
+        );
+      }
+    } catch (error) {
+      console.log('Update check failed:', error);
+    }
+  };
 
   const checkNotifications = () => {
     messaging().setBackgroundMessageHandler(async remoteMessage => {

@@ -10,6 +10,7 @@ import {
   Alert,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  ToastAndroid,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {Dropdown} from 'react-native-element-dropdown';
@@ -165,7 +166,7 @@ const FutureStep1 = ({navigation}) => {
         setCustomAlert({
           visible: true,
           title: 'Error',
-          message: 'Please select a profit modal.',
+          message: 'Please select a Profit Model.',
         });
         setIsLoading(false);
         return null;
@@ -297,8 +298,12 @@ const FutureStep1 = ({navigation}) => {
             returnAmount: return_amount,
             percentageReturn: percentage,
           },
-          'chartData12344444',
+          'future step 1 data',
         );
+        if (!chart || !return_amount || !percentage) {
+                  setIsLoading(false);
+                  ToastAndroid.show('No data found for the provided inputs.');
+                } else {
         navigation.navigate('FutureStep2Screen', {
           chartData: chart,
           returnAmount: return_amount,
@@ -310,10 +315,12 @@ const FutureStep1 = ({navigation}) => {
           withdrawalFrequency: withdrawalFrequency,
           selectedOptiony: selectedOptiony,
         });
+      }
       } catch (error) {
         setIsLoading(false);
         console.error('Error in handling next step:', error);
-        alert('An error occurred. Please try again.');
+        ToastAndroid.show('No data found for the provided inputs.', ToastAndroid.SHORT);
+        // alert('An error occurred. Please try again.');
       }
     }
   };
@@ -419,10 +426,10 @@ const FutureStep1 = ({navigation}) => {
             </View>
           )}
 
-          {/* Profit Modal Field */}
+          {/* Profit Model Field */}
           {showProfitModal && (
             <>
-              <Text style={styles.label}>{t('Select Profit Modal')}</Text>
+              <Text style={styles.label}>{t('Select Profit Model')}</Text>
               <View style={styles.checkboxContainer}>
                 <TouchableOpacity
                   style={[

@@ -136,7 +136,7 @@ const InvestReturnIndividual = ({route, navigation}) => {
               {t('Investment Mode')} : Any
             </Text>
             <Text style={styles.detailItem}>
-              <Text style={styles.colorBlockPurple}>⬤</Text> {t('Profit Modal')}{' '}
+              <Text style={styles.colorBlockPurple}>⬤</Text> {t('Profit Model')}{' '}
               : {profitModal}({withdrawalFrequency})
             </Text>
           </View>

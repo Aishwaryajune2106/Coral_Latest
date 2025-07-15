@@ -124,6 +124,7 @@ const AppImages = {
   Verified: require('../Assets/verified.png'),
   Rejected: require('../Assets/rejected.png'),
   Pdf: require('../Assets/pdf.png'),
+  Pin: require('../Assets/pin.png'),
 };
 
 export default AppImages;

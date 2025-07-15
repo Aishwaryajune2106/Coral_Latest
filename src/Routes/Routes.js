@@ -110,6 +110,8 @@ import Futureoption3 from '../Screens/FutureOption/Futureoption3';
 import Futureoption4 from '../Screens/FutureOption/Futureoption4';
 import NomineeList from '../Screens/Contracts/NomineeList';
 import Cwigraph from '../Screens/CWI_Invest/Cwigraph';
+import PinGenerate from '../Screens/PinGenerate/PinGenerate';
+import PinConfirm from '../Screens/PinGenerate/PinConfirm';
 
 const Stack = createNativeStackNavigator();
 
@@ -133,7 +135,6 @@ function AuthStack() {
         component={Login}
         options={{headerShown: false}}
       />
-
       <Stack.Screen
         name="CreateAccountScreen"
         component={CreateAccount}
@@ -241,7 +242,6 @@ function AuthStack() {
           header: () => <Header pageName={t('KYC')} navigation={navigation} />,
         })}
       />
-
       <Stack.Screen
         name="KycthreeScreen"
         component={Kycthree}
@@ -270,7 +270,6 @@ function AuthStack() {
           header: () => <Header pageName={t('KYC')} navigation={navigation} />,
         })}
       />
-
       <Stack.Screen
         name="YourphotoScreen"
         component={Yourphoto}
@@ -303,7 +302,6 @@ function AuthStack() {
         component={Investmentstep4}
         options={{headerShown: false}}
       />
-
       <Stack.Screen
         name="PaymentDetailScreen"
         component={PaymentDetail}
@@ -366,7 +364,6 @@ function AuthStack() {
           ),
         })}
       />
-
       <Stack.Screen
         name="WithdrawverifyScreen"
         component={Withdrawverify}
@@ -450,7 +447,6 @@ function AuthStack() {
         component={FutureStep2}
         options={{headerShown: false}}
       />
-
       <Stack.Screen
         name="FutureStep1IndScreen"
         component={FutureStep1Ind}
@@ -480,13 +476,11 @@ function AuthStack() {
         component={Futureoption3}
         options={{headerShown: false}}
       />
-
       <Stack.Screen
         name="FutureOption4"
         component={Futureoption4}
         options={{headerShown: false}}
       />
-
       <Stack.Screen
         name="ProfitScreen"
         component={Profit}
@@ -634,6 +628,16 @@ function AuthStack() {
         })}
       />
       <Stack.Screen
+        name="PinGenerateScreen"
+        component={PinGenerate}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="PinConfirmScreen"
+        component={PinConfirm}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
         name="PrivacyScreen"
         component={Privacy}
         options={({navigation}) => ({
@@ -703,7 +707,6 @@ function AuthStack() {
         component={Contactus}
         options={{headerShown: false}}
       />
-
       <Stack.Screen
         name="DashBoardStack"
         component={DashboardStack}

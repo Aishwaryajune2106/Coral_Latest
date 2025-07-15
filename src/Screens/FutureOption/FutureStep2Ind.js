@@ -10,6 +10,7 @@ import {
   Alert,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  ToastAndroid,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {Dropdown} from 'react-native-element-dropdown';
@@ -161,7 +162,7 @@ const FutureStep2Ind = ({navigation, route}) => {
         setCustomAlert({
           visible: true,
           title: 'Error',
-          message: 'Please select a profit modal.',
+          message: 'Please select a Profit Model.',
         });
         setIsLoading(false);
         return null;
@@ -205,7 +206,7 @@ const FutureStep2Ind = ({navigation, route}) => {
       const {result, return_amount, percentage} = response.data;
 
       console.log('Response', response.data);
-     
+
       if (result && return_amount) {
         const parsedReturnAmount = parseFloat(return_amount);
         if (!isNaN(parsedReturnAmount)) {
@@ -245,10 +246,19 @@ const FutureStep2Ind = ({navigation, route}) => {
             percentage,
           };
         } else {
-          alert('Invalid return amount');
+          // alert('Invalid return amount');
+                  ToastAndroid.show(
+                    "Invalid return amount" || 'No data found for the provided inputs.',
+                    ToastAndroid.SHORT,
+                  );
+          
         }
       } else {
-        alert('No Data Found');
+        // alert('No Data Found');
+         ToastAndroid.show(
+                    "No Data Found" || 'No data found for the provided inputs.',
+                    ToastAndroid.SHORT,
+                  );
       }
     } catch (error) {
       console.error('Error fetching investment data: ', error);
@@ -277,17 +287,22 @@ const FutureStep2Ind = ({navigation, route}) => {
             returnAmount: return_amount,
             percentageReturn: percentage,
           },
-          'chartData12344444',
+          'FutureStep2Ind',
         );
-        navigation.navigate('FutureStep3IndScreen', {
-          investmentAmount: investmentAmount,
-          duration: duration,
-          profitModal: profitModal,
-          withdrawalFrequency: withdrawalFrequency,
-          chartData: chart,
-          returnAmount: return_amount,
-          percentageReturn: percentage,
-        });
+        if (!chart || !return_amount || !percentage) {
+          setIsLoading(false);
+          ToastAndroid.show('No data found for the provided inputs.');
+        } else {
+          navigation.navigate('FutureStep3IndScreen', {
+            investmentAmount: investmentAmount,
+            duration: duration,
+            profitModal: profitModal,
+            withdrawalFrequency: withdrawalFrequency,
+            chartData: chart,
+            returnAmount: return_amount,
+            percentageReturn: percentage,
+          });
+        }
       } catch (error) {
         setIsLoading(false);
         console.error('Error in handling next step:', error);
@@ -385,7 +400,7 @@ const FutureStep2Ind = ({navigation, route}) => {
 
           {showProfitModal && (
             <>
-              <Text style={styles.label}>{t('Select Profit Modal')}</Text>
+              <Text style={styles.label}>{t('Select Profit Model')}</Text>
               <View style={styles.checkboxContainer}>
                 <TouchableOpacity
                   style={[

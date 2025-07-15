@@ -11,6 +11,7 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
   BackHandler,
+  ToastAndroid,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {Dropdown} from 'react-native-element-dropdown';
@@ -175,7 +176,7 @@ const InvestmentPlan = ({navigation}) => {
         setCustomAlert({
           visible: true,
           title: 'Error',
-          message: 'Please select a profit modal.',
+          message: 'Please select a profit model.',
         });
         setIsLoading(false);
         return null;
@@ -206,7 +207,8 @@ const InvestmentPlan = ({navigation}) => {
 
   useEffect(() => {
     fetchInvestmentData();
-  }, [investmentAmount, duration, withdrawalFrequency]);
+  }, []);
+  // }, [investmentAmount, duration, withdrawalFrequency]); // doubt why should we include these dependencies?
 
   useEffect(() => {
     handleReset();
@@ -227,13 +229,11 @@ const InvestmentPlan = ({navigation}) => {
       // Validate if the response is correct
 
       // Check for missing data or false result
-      if (!result || !return_amount || !percentage) {
-        setCustomAlert({
-          visible: true,
-          title: 'No Data Found',
-          message: 'No data found for the provided inputs.',
-        });
-        return {}; // return an empty object to prevent further processing
+      if (!result || result === false || !return_amount || !percentage) {
+        ToastAndroid.show(
+          response.data?.message || 'No data found for the provided inputs.',
+          ToastAndroid.SHORT,
+        );
       }
       if (result && return_amount) {
         const parsedReturnAmount = parseFloat(return_amount);
@@ -253,7 +253,7 @@ const InvestmentPlan = ({navigation}) => {
           const truncatedNumbers = growth?.map(Math.trunc);
 
           console.log('Growth Array:', truncatedNumbers);
-          const chart={
+          const chart = {
             labels: years,
             datasets: [
               {
@@ -262,7 +262,7 @@ const InvestmentPlan = ({navigation}) => {
                 strokeWidth: 2,
               },
             ],
-          }
+          };
           setChartData(chart);
 
           const profit = parsedReturnAmount - parseFloat(investmentAmount);
@@ -296,8 +296,9 @@ const InvestmentPlan = ({navigation}) => {
       try {
         // Fetch the investment data before navigating
         console.log('Fetching before investment data...');
-        const {return_amount, chart, percentage} =
-          await fetchInvestmentData(convertedAED);
+        const {return_amount, chart, percentage} = await fetchInvestmentData(
+          convertedAED,
+        );
         console.log('Investment data fetched:');
 
         // After the data is fetched and state is updated, navigate to the next screen
@@ -311,16 +312,20 @@ const InvestmentPlan = ({navigation}) => {
           },
           'chartData12344444',
         );
-
-        navigation.navigate('InvestReturnScreen', {
-          chartData: chart,
-          returnAmount: return_amount,
-          percentageReturn: percentage,
-        });
+        if (!chart || !return_amount || !percentage) {
+          setIsLoading(false);
+          ToastAndroid.show('No data found for the provided inputs.');
+        } else {
+          navigation.navigate('InvestReturnScreen', {
+            chartData: chart,
+            returnAmount: return_amount,
+            percentageReturn: percentage,
+          });
+        }
       } catch (error) {
         setIsLoading(false); // In case of error, stop the loading
         console.error('Error in handling next step:', error);
-        alert('An error occurred. Please try again.');
+        ToastAndroid('An error occurred. Please try again.');
       }
     }
   };
@@ -389,7 +394,7 @@ const InvestmentPlan = ({navigation}) => {
                 setShowDuration(true);
               } else {
                 setShowDuration(false);
-                setDuration(null); // clear duration if amount is removed
+                setDuration(null);
               }
             }}
           />
@@ -410,7 +415,7 @@ const InvestmentPlan = ({navigation}) => {
               <Text style={styles.label1}>{t('Duration')} (Years)</Text>
               <TextInput
                 style={styles.input}
-                 maxLength={2}
+                maxLength={2}
                 placeholderTextColor={AppColors.perfectgrey}
                 placeholder={t('Enter duration in years')}
                 keyboardType="numeric"
@@ -433,7 +438,7 @@ const InvestmentPlan = ({navigation}) => {
           {/* Profit Modal Field */}
           {showProfitModal && (
             <>
-              <Text style={styles.label}>{t('Select Profit Modal')}</Text>
+              <Text style={styles.label}>{t('Select Profit Model')}</Text>
               <View style={styles.checkboxContainer}>
                 <TouchableOpacity
                   style={[

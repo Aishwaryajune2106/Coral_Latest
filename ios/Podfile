@@ -1,3 +1,10 @@
+# frozen_string_literal: true
+
+require 'json'
+require 'pathname'
+require 'fileutils'
+require 'etc'
+
 # Resolve react_native_pods.rb with node to allow for hoisting
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
@@ -5,9 +12,17 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, min_ios_version_supported
+platform :ios, '15.0'  # ✅ Set minimum iOS deployment target
+
+# ✅ Enable modular headers for Swift interop (fixes FirebaseCoreInternal)
+use_modular_headers!
+
+# Disable New Architecture (optional unless you're using Fabric/TurboModules)
+ENV['RCT_NEW_ARCH_ENABLED'] = '0'
+
 prepare_react_native_project!
 
+# Frameworks usage (optional - enable if you really need dynamic frameworks)
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
@@ -19,17 +34,28 @@ target 'corallatest' do
 
   use_react_native!(
     :path => config[:reactNativePath],
-    # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  # ✅ If you have unit tests, you can add a test target (optional)
+  # target 'corallatestTests' do
+  #   inherit! :complete
+  #   # Pods for testing
+  # end
+
   post_install do |installer|
-    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
       installer,
       config[:reactNativePath],
-      :mac_catalyst_enabled => false,
-      # :ccache_enabled => true
+      :mac_catalyst_enabled => false
     )
+
+    # ✅ Force all pods to use iOS 15.0 & fix arm64 simulator issue on M1/M2 Macs
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+      end
+    end
   end
 end

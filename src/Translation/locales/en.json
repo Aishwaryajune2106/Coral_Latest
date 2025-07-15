@@ -70,7 +70,7 @@
   "Investment Amount": "Investment Amount",
   "Amount should not be less than 52,000 AED": "Amount should not be less than 52,000 AED",
   "Investment End Date": "Investment End Date",
-  "Select Profit Modal": "Select Profit Modal",
+  "Select Profit Model": "Select Profit Model",
   "Fixed": "Fixed",
   "Flexible": "Flexible",
   "Select Withdrawal Frequency": "Select Withdrawal Frequency",
@@ -89,7 +89,7 @@
   "Estimated Profit Growth": "Estimated Profit Growth",
   "End Date": "End Date",
   "Investment Mode": "Investment Mode",
-  "Profit Modal": "Profit Modal",
+  "Profit Model": "Profit Model",
   "CONTINUE": "CONTINUE",
   "Security Assurance": "Security Assurance",
   "Select Security Option": "Select Security Option",
@@ -356,5 +356,6 @@
   "UPDATE BANK": "UPDATE BANK",
   "Bank Edited Successful": "Bank Edited Successful",
   "Type message": "Type message",
-  "OK": "OK"
+  "OK": "OK",
+  "MPin": "MPin"
 }
